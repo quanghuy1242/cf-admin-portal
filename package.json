@@ -13,6 +13,7 @@
     "cf-typegen": "wrangler types --env-interface CloudflareEnv env.d.ts"
   },
   "dependencies": {
+    "@auth0/nextjs-auth0": "^3.5.0",
     "next": "14.1.0",
     "react": "^18",
     "react-dom": "^18"
@@ -28,9 +29,13 @@
     "eslint-config-next": "14.1.0",
     "eslint-plugin-next-on-pages": "^1.12.1",
     "postcss": "^8",
+    "prettier": "^3.3.3",
     "tailwindcss": "^3.3.0",
     "typescript": "^5",
     "vercel": "^35.2.1",
     "wrangler": "^3.67.1"
+  },
+  "prettier": {
+    "tabWidth": 2
   }
 }
