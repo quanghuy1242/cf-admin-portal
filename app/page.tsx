@@ -1,4 +1,5 @@
 import { getSession, withPageAuthRequired } from "@auth0/nextjs-auth0/edge";
+import Button from "antd/lib/button";
 
 export default withPageAuthRequired(
   async function Home() {
@@ -11,10 +12,10 @@ export default withPageAuthRequired(
     const { user } = session;
 
     return (
-      <>
+      <div>
         <h1>{JSON.stringify(user, null, 2)}</h1>
-        <a href="/api/auth/logout">Logout</a>
-      </>
+        <Button href="/api/auth/logout">Logout</Button>
+      </div>
     );
   },
   { returnTo: "/" },
