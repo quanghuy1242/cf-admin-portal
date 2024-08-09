@@ -1,113 +1,67 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import { UserProvider } from "@auth0/nextjs-auth0/client";
-import { AntdRegistry } from "@ant-design/nextjs-registry";
-import Menu from "antd/lib/menu";
-import Sider from "antd/lib/layout/Sider";
+"use client";
+
+import { CreateButtonMain } from "./components/create-main";
+import { SideNavWrapped } from "./components/sidenav";
+import { TopNavWrapped } from "./components/topnav";
 import "./globals.css";
-import { Content, Header } from "antd/lib/layout/layout";
-import type { MenuProps } from "antd";
-import {
-  ContainerOutlined,
-  FileImageOutlined,
-  FileTextOutlined,
-  FolderOpenOutlined,
-  HomeOutlined,
-  InfoCircleOutlined,
-  UsergroupDeleteOutlined,
-} from "@ant-design/icons";
-import Flex from "antd/lib/flex";
-import Link from "next/link";
-import Breadcrumb from "antd/lib/breadcrumb";
-import Title from "antd/lib/typography/Title";
+import { defaultTheme, Flex, Provider, View } from "@adobe/react-spectrum";
+import { UserProvider } from "@auth0/nextjs-auth0/client";
+import { Theme } from "@swc-react/theme/next.js";
+import { Inter } from "next/font/google";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { SWRConfig } from "swr";
 
 const inter = Inter({ subsets: ["latin"] });
-type MenuItem = Required<MenuProps>["items"][number];
-
-export const metadata: Metadata = {
-  title: "CMS Admin Portal",
-  description: "Conent Management Service - Admin Portal",
-};
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const routers: MenuItem[] = [
-    {
-      key: "home",
-      label: <Link href="/">Home</Link>,
-      icon: <HomeOutlined />,
-    },
-    {
-      key: "content",
-      label: <Link href="/content">Content</Link>,
-      icon: <FileTextOutlined />,
-    },
-    {
-      key: "collection",
-      label: "Collection",
-      icon: <FolderOpenOutlined />,
-    },
-    {
-      key: "category",
-      label: "Category",
-      icon: <ContainerOutlined />,
-    },
-    {
-      key: "images",
-      label: "Images",
-      icon: <FileImageOutlined />,
-    },
-    {
-      key: "users",
-      label: "Users",
-      icon: <UsergroupDeleteOutlined />,
-    },
-    {
-      key: "about",
-      label: "About",
-      icon: <InfoCircleOutlined />,
-    },
-  ];
+  // Something needs to be imported from web component
+  useEffect(() => {
+    import("@spectrum-web-components/theme/theme-light.js");
+    import("@spectrum-web-components/theme/scale-medium.js");
+  }, []);
+
+  const router = useRouter();
+
   return (
-    <UserProvider>
-      <html lang="en">
-        <body className={inter.className}>
-          <AntdRegistry>
-            <Header>
-              <Flex align="center" style={{ height: "100%" }}>
-                <Title level={3} style={{ color: "white", marginBottom: 5 }}>
-                  Admin Portal
-                </Title>
-              </Flex>
-            </Header>
-            <Flex gap={10}>
-              <Sider style={{ height: "auto" }} collapsed={false}>
-                <Menu
-                  style={{ height: "calc(100vh - 64px)" }}
-                  items={routers}
-                  defaultSelectedKeys={["home"]}
-                />
-              </Sider>
-              <Flex vertical={true} gap={10} style={{ marginTop: 10 }}>
-                <Breadcrumb
-                  items={[
-                    {
-                      title: <Link href="/">Home</Link>,
-                    },
-                    {
-                      title: <Link href="/content">Content</Link>,
-                    },
-                  ]}
-                />
-                <Content>{children}</Content>
-              </Flex>
-            </Flex>
-          </AntdRegistry>
-        </body>
-      </html>
-    </UserProvider>
+    <html lang="en">
+      <UserProvider>
+        <SWRConfig>
+          <body className={inter.className + " body"}>
+            <Theme theme="spectrum" color="light" scale="medium">
+              <Provider theme={defaultTheme} router={{ navigate: router.push }}>
+                <Flex direction="column" gap={10}>
+                  <View padding={10} paddingTop={0}>
+                    <TopNavWrapped />
+                  </View>
+                  <Flex direction="row" gap={10} flexGrow={1}>
+                    <View margin={10} marginTop={0}>
+                      <Flex marginBottom={20} marginStart={10}>
+                        <CreateButtonMain />
+                      </Flex>
+                      <SideNavWrapped />
+                    </View>
+                    <View
+                      width={"100%"}
+                      height="calc(100vh - 90px)"
+                      overflow="auto"
+                      paddingX={10}
+                      paddingBottom={10}
+                      backgroundColor="gray-100"
+                    >
+                      {children}
+                    </View>
+                  </Flex>
+                </Flex>
+              </Provider>
+            </Theme>
+          </body>
+        </SWRConfig>
+      </UserProvider>
+    </html>
   );
 }

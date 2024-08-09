@@ -8,16 +8,20 @@ pages_build_output_dir = ".vercel/output/static"
 # If you are running back-end logic in a Pages Function, running it closer to your back-end infrastructure
 # rather than the end user may result in better performance.
 # Docs: https://developers.cloudflare.com/pages/functions/smart-placement/#smart-placement
-# [placement]
-# mode = "smart"
+[placement]
+mode = "smart"
 
 # Variable bindings. These are arbitrary, plaintext strings (similar to environment variables)
 # Docs:
 # - https://developers.cloudflare.com/pages/functions/bindings/#environment-variables
 # Note: Use secrets to store sensitive data.
 # - https://developers.cloudflare.com/pages/functions/bindings/#secrets
-# [vars]
-# MY_VARIABLE = "production_value"
+[vars]
+AUTH0_BASE_URL='https://admin-next.quanghuy.dev'
+AUTH0_ISSUER_BASE_URL='https://quanghuy1242.us.auth0.com'
+AUTH0_CLIENT_ID='YGHZtDMecXvfXRywQedCLULlV1PirTkx'
+AUTH0_SESSION_AUTO_SAVE=false
+AUTH0_AUDIENCE='https://api.quanghuy.dev'
 
 # Bind the Workers AI model catalog. Run machine learning models, powered by serverless GPUs, on Cloudflare’s global network
 # Docs: https://developers.cloudflare.com/pages/functions/bindings/#workers-ai

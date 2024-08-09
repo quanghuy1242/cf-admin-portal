@@ -1,21 +1,55 @@
-import { getSession, withPageAuthRequired } from "@auth0/nextjs-auth0/edge";
-import Button from "antd/lib/button";
+"use client";
+
+import {
+  ActionButton,
+  Button,
+  Content,
+  Flex,
+  Heading,
+  InlineAlert,
+  Item,
+  LabeledValue,
+  Menu,
+  MenuTrigger,
+} from "@adobe/react-spectrum";
+import { useUser, withPageAuthRequired } from "@auth0/nextjs-auth0/client";
+import { useState } from "react";
 
 export default withPageAuthRequired(
-  async function Home() {
-    const session = await getSession();
+  function Home() {
+    const { user, isLoading } = useUser();
+    const [count, setCount] = useState(0);
 
-    if (!session) {
-      return <a href="/api/auth/login">Login</a>;
-    }
-
-    const { user } = session;
+    if (isLoading) return <div>Loading...</div>;
 
     return (
-      <div>
-        <h1>{JSON.stringify(user, null, 2)}</h1>
-        <Button href="/api/auth/logout">Logout</Button>
-      </div>
+      <Flex direction="column" gap={10}>
+        <Flex gap={10} direction="row">
+          <Button variant="accent" onPress={() => setCount(count + 1)}>
+            Fuck me {count} time{count !== 1 ? "s" : ""}!
+          </Button>
+          <MenuTrigger>
+            <ActionButton>Edit</ActionButton>
+            <Menu onAction={(key) => alert(key)}>
+              <Item key="cut">Cut</Item>
+              <Item key="copy">Copy</Item>
+              <Item key="paste">Paste</Item>
+              <Item key="replace">Replace</Item>
+            </Menu>
+          </MenuTrigger>
+        </Flex>
+        <InlineAlert>
+          <Heading>Authenticated user</Heading>
+          <Content>
+            <Flex direction="column" gap={10}>
+              <LabeledValue label="Fullname" value={user?.name || ""} />
+              <LabeledValue label="Email" value={user?.email || ""} />
+              <LabeledValue label="Nickname" value={user?.nickname || ""} />
+              <LabeledValue label="Updated at" value={user?.updated_at || ""} />
+            </Flex>
+          </Content>
+        </InlineAlert>
+      </Flex>
     );
   },
   { returnTo: "/" },

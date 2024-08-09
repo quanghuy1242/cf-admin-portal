@@ -1,0 +1,7 @@
+.content-table div[role="row"] .action-button {
+  --hover-button-display: none;
+}
+
+.content-table div[role="row"]:hover .action-button {
+  --hover-button-display: "in-line";
+}
