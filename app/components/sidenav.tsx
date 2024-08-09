@@ -1,3 +1,5 @@
+import { withNoSSR } from "./nossr";
+import { Flex, ProgressCircle } from "@adobe/react-spectrum";
 import { IconArchive } from "@swc-react/icons-workflow/next/Archive";
 import { IconBox } from "@swc-react/icons-workflow/next/Box";
 import { IconBreakdown } from "@swc-react/icons-workflow/next/Breakdown";
@@ -17,13 +19,20 @@ import {
   SideNavItem,
 } from "@swc-react/sidenav/next.js";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { withNoSSR } from "./nossr";
-import { Flex, ProgressCircle } from "@adobe/react-spectrum";
+import { ReactNode, useEffect, useState } from "react";
+
+interface Route {
+  label: string;
+  icon?: ReactNode;
+  heading?: boolean;
+  href?: string;
+  disablePrefetch?: boolean;
+  children?: Route[];
+}
 
 const SideNavActual = () => {
   const [selectedSideNavItem, setSelectedSideNavItem] = useState("/");
-  const routers = [
+  const routers: Route[] = [
     {
       label: "Home",
       icon: <IconHome slot="icon" />,
@@ -125,6 +134,21 @@ const SideNavActual = () => {
   const router = useRouter();
 
   useEffect(() => {
+    // Allow 2 levels for prefetching
+    routers.forEach((r) => {
+      if (!r?.disablePrefetch && r?.href) {
+        router.prefetch(r.href);
+      } else if (r?.children) {
+        r.children.forEach((cr) => {
+          if (!cr?.disablePrefetch && cr.href) {
+            router.prefetch(cr.href);
+          }
+        });
+      }
+    });
+  });
+
+  useEffect(() => {
     setSelectedSideNavItem(pathname);
   }, [pathname]);
 
@@ -139,7 +163,7 @@ const SideNavActual = () => {
       {routers.map((r) =>
         r.heading ? (
           <SideNavHeading key={r.label} label={r.label}>
-            {r.children.map((cr) => (
+            {(r?.children || []).map((cr) => (
               <SideNavItem
                 href={cr.href}
                 key={cr.href}

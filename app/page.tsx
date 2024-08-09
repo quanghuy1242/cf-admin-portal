@@ -1,5 +1,6 @@
 "use client";
 
+import { useMainStore } from "@/stores/providers/main-store-provider";
 import {
   ActionButton,
   Button,
@@ -13,19 +14,18 @@ import {
   MenuTrigger,
 } from "@adobe/react-spectrum";
 import { useUser, withPageAuthRequired } from "@auth0/nextjs-auth0/client";
-import { useState } from "react";
 
 export default withPageAuthRequired(
   function Home() {
     const { user, isLoading } = useUser();
-    const [count, setCount] = useState(0);
+    const { count, incrementCount } = useMainStore((state) => state);
 
     if (isLoading) return <div>Loading...</div>;
 
     return (
       <Flex direction="column" gap={10}>
         <Flex gap={10} direction="row">
-          <Button variant="accent" onPress={() => setCount(count + 1)}>
+          <Button variant="accent" onPress={() => incrementCount()}>
             Fuck me {count} time{count !== 1 ? "s" : ""}!
           </Button>
           <MenuTrigger>
