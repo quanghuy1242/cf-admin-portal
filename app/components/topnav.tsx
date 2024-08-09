@@ -1,3 +1,4 @@
+import { withNoSSR } from "./nossr";
 import {
   ActionButton,
   Avatar,
@@ -10,7 +11,6 @@ import {
 } from "@adobe/react-spectrum";
 import Home from "@spectrum-icons/workflow/Home";
 import { TopNav, TopNavItem } from "@swc-react/top-nav/next.js";
-import { withNoSSR } from "./nossr";
 
 const TopNavActual = () => {
   return (
@@ -27,14 +27,20 @@ const TopNavActual = () => {
           <Avatar src="https://contents.quanghuy.dev/birdless-sky-300-1.png" />
         </ActionButton>
         <Menu
-          onAction={(e) =>
-            // Dirty trick
-            e == "signout"
-              ? window.location.assign("/api/auth/logout")
-              : (() => {})()
-          }
+          onAction={(e) => {
+            switch (e) {
+              case "signout":
+                window.location.assign("/api/auth/logout");
+                break;
+
+              default:
+                break;
+            }
+          }}
         >
-          <Item key="about">Learn about yourself</Item>
+          <Item key="about" href="/about">
+            Learn about yourself
+          </Item>
           <Item key="signout">Sign out</Item>
         </Menu>
       </MenuTrigger>

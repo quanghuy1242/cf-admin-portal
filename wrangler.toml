@@ -17,7 +17,7 @@ mode = "smart"
 # Note: Use secrets to store sensitive data.
 # - https://developers.cloudflare.com/pages/functions/bindings/#secrets
 [vars]
-AUTH0_BASE_URL='https://admin-next.quanghuy.dev'
+# AUTH0_BASE_URL='https://admin-next.quanghuy.dev'
 AUTH0_ISSUER_BASE_URL='https://quanghuy1242.us.auth0.com'
 AUTH0_CLIENT_ID='YGHZtDMecXvfXRywQedCLULlV1PirTkx'
 AUTH0_SESSION_AUTO_SAVE=false

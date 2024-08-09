@@ -1,9 +1,9 @@
 "use client";
 
+import { fetcher } from "../utils/swc";
 import { Flex } from "@adobe/react-spectrum";
 import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
 import useSWR, { Fetcher } from "swr";
-import { fetcher } from "../utils/swc";
 
 export default withPageAuthRequired(
   function About() {
