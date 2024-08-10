@@ -1,4 +1,4 @@
-import { AppSlice, AppState, createAppSlice } from "./app-store";
+import { AppSlice, AppState, createAppSlice } from "@/stores/slices/app";
 import { immer } from "zustand/middleware/immer";
 import { createStore } from "zustand/vanilla";
 

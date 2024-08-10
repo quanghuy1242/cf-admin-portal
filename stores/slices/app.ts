@@ -1,4 +1,4 @@
-import { ImmerStateCreator } from "./type-helpers";
+import { ImmerStateCreator } from "@/stores/type-helpers";
 
 export type AppState = {
   count: number;

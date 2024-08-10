@@ -44,6 +44,60 @@ interface Character {
   birth_year: number;
 }
 
+const cellByKey = (key: any, item: Character) => {
+  switch (key) {
+    case "more":
+      return (
+        <MenuTrigger>
+          <ActionButton isQuiet>
+            <MoreVertical />
+          </ActionButton>
+          <Menu onAction={(key) => alert(key)}>
+            <Item key="cut">Cut this shit</Item>
+            <Item key="copy">Copy it out</Item>
+            <Item key="paste">Paste this right here</Item>
+            <Item key="replace">Replace him</Item>
+          </Menu>
+        </MenuTrigger>
+      );
+
+    case "status":
+      const isDrafting = item["height"] < 170;
+      return (
+        <StatusLight variant={isDrafting ? "yellow" : "positive"}>
+          {isDrafting ? "Drafting" : "Published"}
+        </StatusLight>
+      );
+
+    case "action":
+      return (
+        <ActionButton
+          UNSAFE_className="action-button"
+          isQuiet
+          UNSAFE_style={{
+            display: "var(--hover-button-display)",
+          }}
+        >
+          <PrintPreview />
+        </ActionButton>
+      );
+
+    case "name":
+      return (
+        <Link
+          href={`/content/${item["height"]}`}
+          isQuiet
+          UNSAFE_style={{ color: "black" }}
+        >
+          {item[key as keyof Character]}
+        </Link>
+      );
+
+    default:
+      return <>{item[key as keyof Character]}</>;
+  }
+};
+
 export default withPageAuthRequired(
   function ContentListPage() {
     let [selectedKeys, setSelectedKeys] = useState<Selection>(new Set([]));
@@ -116,11 +170,10 @@ export default withPageAuthRequired(
                     allowsResizing
                     align={column.key === "action" ? "end" : "start"}
                     width={
-                      column.key === "more"
-                        ? 100
-                        : column.key === "action"
-                          ? 50
-                          : null
+                      {
+                        more: 100,
+                        action: 50,
+                      }[column.key] || null
                     }
                   >
                     {column.name}
@@ -134,59 +187,7 @@ export default withPageAuthRequired(
               >
                 {(item) => (
                   <Row key={item.name}>
-                    {(key) =>
-                      key === "more" ? (
-                        <Cell>
-                          <MenuTrigger>
-                            <ActionButton isQuiet>
-                              <MoreVertical />
-                            </ActionButton>
-                            <Menu onAction={(key) => alert(key)}>
-                              <Item key="cut">Cut this shit</Item>
-                              <Item key="copy">Copy it out</Item>
-                              <Item key="paste">Paste this right here</Item>
-                              <Item key="replace">Replace him</Item>
-                            </Menu>
-                          </MenuTrigger>
-                        </Cell>
-                      ) : key === "status" ? (
-                        <Cell>
-                          <StatusLight
-                            variant={
-                              item["height"] < 170 ? "yellow" : "positive"
-                            }
-                          >
-                            {item["height"] < 170 ? "Drafting" : "Published"}
-                          </StatusLight>
-                        </Cell>
-                      ) : key === "action" ? (
-                        <Cell>
-                          <ActionButton
-                            UNSAFE_className="action-button"
-                            isQuiet
-                            UNSAFE_style={{
-                              display: "var(--hover-button-display)",
-                            }}
-                          >
-                            <PrintPreview />
-                          </ActionButton>
-                        </Cell>
-                      ) : (
-                        <Cell>
-                          {key === "name" ? (
-                            <Link
-                              href={`/content/${item["height"]}`}
-                              isQuiet
-                              UNSAFE_style={{ color: "black" }}
-                            >
-                              {item[key as keyof Character]}
-                            </Link>
-                          ) : (
-                            item[key as keyof Character]
-                          )}
-                        </Cell>
-                      )
-                    }
+                    {(key) => <Cell>{cellByKey(key, item)}</Cell>}
                   </Row>
                 )}
               </TableBody>

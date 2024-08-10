@@ -1,6 +1,6 @@
 "use client";
 
-import { useMainStore } from "@/stores/providers/main-store-provider";
+import { useMainStore } from "@/stores/providers/main-store";
 import {
   ActionButton,
   Button,
@@ -13,14 +13,11 @@ import {
   Menu,
   MenuTrigger,
 } from "@adobe/react-spectrum";
-import { useUser, withPageAuthRequired } from "@auth0/nextjs-auth0/client";
+import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
 
 export default withPageAuthRequired(
-  function Home() {
-    const { user, isLoading } = useUser();
+  function Home({ user }) {
     const { count, incrementCount } = useMainStore((state) => state);
-
-    if (isLoading) return <div>Loading...</div>;
 
     return (
       <Flex direction="column" gap={10}>
