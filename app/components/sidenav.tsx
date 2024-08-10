@@ -1,4 +1,5 @@
 import { withNoSSR } from "./nossr";
+import { useMainStore } from "@/stores/providers/main-store";
 import { Flex, ProgressCircle } from "@adobe/react-spectrum";
 import { IconArchive } from "@swc-react/icons-workflow/next/Archive";
 import { IconBox } from "@swc-react/icons-workflow/next/Box";
@@ -32,6 +33,7 @@ interface Route {
 
 const SideNavActual = () => {
   const [selectedSideNavItem, setSelectedSideNavItem] = useState("/");
+  const { pageMeta, resetPageMeta } = useMainStore((state) => state);
   const routers: Route[] = [
     {
       label: "Home",
@@ -150,7 +152,12 @@ const SideNavActual = () => {
 
   useEffect(() => {
     setSelectedSideNavItem(pathname);
+    resetPageMeta();
   }, [pathname]);
+
+  useEffect(() => {
+    document.title = pageMeta.title + " - admin.quanghuy.dev";
+  }, [pageMeta]);
 
   return (
     <SideNav

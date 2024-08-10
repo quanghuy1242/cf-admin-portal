@@ -1,5 +1,6 @@
 "use client";
 
+import { usePageMeta } from "./hooks/pageMeta";
 import { useMainStore } from "@/stores/providers/main-store";
 import {
   ActionButton,
@@ -18,6 +19,7 @@ import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
 export default withPageAuthRequired(
   function Home({ user }) {
     const { count, incrementCount } = useMainStore((state) => state);
+    usePageMeta({ title: "Home" });
 
     return (
       <Flex direction="column" gap={10}>

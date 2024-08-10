@@ -1,5 +1,6 @@
 "use client";
 
+import { usePageMeta } from "../hooks/pageMeta";
 import "./page.css";
 import { useMainStore } from "@/stores/providers/main-store";
 import { Character } from "@/stores/slices/content";
@@ -95,6 +96,7 @@ const cellByKey = (key: any, item: Character) => {
 export default withPageAuthRequired(
   function ContentListPage() {
     const tableRef = useRef<any>();
+    usePageMeta({ title: "Published content" });
     const {
       selectedRowIds,
       setSelectedRowIds,
