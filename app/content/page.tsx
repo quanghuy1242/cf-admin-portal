@@ -1,7 +1,8 @@
 "use client";
 
 import "./page.css";
-import type { Selection } from "@adobe/react-spectrum";
+import { useMainStore } from "@/stores/providers/main-store";
+import { Character } from "@/stores/slices/content";
 import {
   ActionBar,
   ActionBarContainer,
@@ -9,26 +10,25 @@ import {
   Cell,
   Column,
   ComboBox,
+  Content,
   Flex,
+  Heading,
+  IllustratedMessage,
   Item,
+  Link,
   Menu,
   MenuTrigger,
   Row,
   SearchField,
+  StatusLight,
   TableBody,
   TableHeader,
   TableView,
-  Text,
-  Link,
-  useAsyncList,
-  StatusLight,
-  View,
-  Tabs,
   TabList,
   TabPanels,
-  IllustratedMessage,
-  Heading,
-  Content,
+  Tabs,
+  Text,
+  useAsyncList,
 } from "@adobe/react-spectrum";
 import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
 import NoSearchResults from "@spectrum-icons/illustrations/NoSearchResults";
@@ -36,13 +36,7 @@ import Delete from "@spectrum-icons/workflow/Delete";
 import Edit from "@spectrum-icons/workflow/Edit";
 import MoreVertical from "@spectrum-icons/workflow/MoreVertical";
 import PrintPreview from "@spectrum-icons/workflow/PrintPreview";
-import { useState } from "react";
-
-interface Character {
-  name: string;
-  height: number;
-  birth_year: number;
-}
+import { useEffect, useRef } from "react";
 
 const cellByKey = (key: any, item: Character) => {
   switch (key) {
@@ -100,7 +94,20 @@ const cellByKey = (key: any, item: Character) => {
 
 export default withPageAuthRequired(
   function ContentListPage() {
-    let [selectedKeys, setSelectedKeys] = useState<Selection>(new Set([]));
+    const tableRef = useRef<any>();
+    const {
+      selectedRowIds,
+      setSelectedRowIds,
+      clearSelectedRowIds,
+      contentStorage,
+      appendContents,
+      contentCursor,
+      setContentCursor,
+      setContentScrollPosition,
+      contentScrollPosition,
+    } = useMainStore((state) => state);
+
+    // Columns for the table
     let columns = [
       { name: "Name", key: "name" },
       { name: "Action", key: "action" },
@@ -110,17 +117,19 @@ export default withPageAuthRequired(
       { name: "More", key: "more" },
     ];
 
-    let list = useAsyncList<Character>({
+    // The loader
+    const _list = useAsyncList<Character>({
       async load({ signal, cursor }) {
         if (cursor) {
           cursor = cursor.replace(/^http:\/\//i, "https://");
         }
 
-        let res = await fetch(
-          cursor || `https://swapi.py4e.com/api/people/?search=`,
-          { signal },
-        );
-        let json: any = await res.json();
+        const res = await fetch(cursor || contentCursor, { signal });
+
+        const json: any = await res.json();
+
+        setContentCursor(json.next);
+        appendContents(json.results);
 
         return {
           items: json.results,
@@ -128,16 +137,30 @@ export default withPageAuthRequired(
         };
       },
     });
+
+    useEffect(() => {
+      const table = (
+        tableRef.current as any
+      ).UNSAFE_getDOMNode() as HTMLDivElement;
+      const body = table.querySelector('[role="rowgroup"]');
+      body?.scrollTo({ top: contentScrollPosition });
+      function onscroll() {
+        const curr = body?.scrollTop || 0;
+        if (curr !== 0) {
+          setContentScrollPosition(curr);
+        }
+      }
+      body?.addEventListener("scroll", onscroll);
+      return () => body?.removeEventListener("scroll", onscroll);
+    }, []);
+
     return (
       <Flex direction="row" height="calc(100vh - 90px)" gap="size-300">
         <Flex
           direction={"column"}
           gap={10}
           height="100%"
-          // maxWidth={960}
-          // maxWidth="90%"
           marginX="auto"
-          // width="60%"
           flexGrow={1}
           width="calc(100% - 400px)"
         >
@@ -160,8 +183,9 @@ export default withPageAuthRequired(
               aria-label="example async loading table"
               selectionStyle="checkbox"
               selectionMode="multiple"
-              selectedKeys={selectedKeys}
-              onSelectionChange={setSelectedKeys}
+              selectedKeys={selectedRowIds}
+              onSelectionChange={setSelectedRowIds}
+              ref={tableRef}
             >
               <TableHeader columns={columns}>
                 {(column) => (
@@ -181,9 +205,9 @@ export default withPageAuthRequired(
                 )}
               </TableHeader>
               <TableBody
-                items={list.items}
-                loadingState={list.loadingState}
-                onLoadMore={list.loadMore}
+                items={contentStorage}
+                loadingState={_list.loadingState}
+                onLoadMore={_list.loadMore}
               >
                 {(item) => (
                   <Row key={item.name}>
@@ -195,11 +219,9 @@ export default withPageAuthRequired(
             <ActionBar
               isEmphasized
               selectedItemCount={
-                selectedKeys === "all" ? "all" : selectedKeys.size
+                selectedRowIds === "all" ? "all" : selectedRowIds.size
               }
-              onClearSelection={() => {
-                setSelectedKeys(new Set());
-              }}
+              onClearSelection={clearSelectedRowIds}
               onAction={(key) => alert(`Performing ${key} action...`)}
             >
               <Item key="edit">
