@@ -2,9 +2,8 @@
 
 import { usePageMeta } from "@/app/hooks/pageMeta";
 import { useMainStore } from "@/stores/providers/main-store";
-import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
 
-export default withPageAuthRequired(function ContentDetailPage({
+export default function ContentDetailPage({
   params,
 }: {
   params: { id: string };
@@ -13,6 +12,6 @@ export default withPageAuthRequired(function ContentDetailPage({
   usePageMeta({ title: `Editing post with ID ${params.id}` });
   setActiveContentId(params.id);
   return <div>My Post: {params.id}</div>;
-});
+}
 
 export const runtime = "edge";
