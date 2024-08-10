@@ -29,6 +29,7 @@ import {
   TabPanels,
   Tabs,
   Text,
+  ToggleButton,
   useAsyncList,
 } from "@adobe/react-spectrum";
 import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
@@ -37,10 +38,18 @@ import Delete from "@spectrum-icons/workflow/Delete";
 import Edit from "@spectrum-icons/workflow/Edit";
 import MoreVertical from "@spectrum-icons/workflow/MoreVertical";
 import PrintPreview from "@spectrum-icons/workflow/PrintPreview";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-const cellByKey = (key: any, item: Character) => {
-  switch (key) {
+interface IAB {
+  keyy: any;
+  item: Character;
+}
+
+const CellByKey = ({ keyy, item }: IAB) => {
+  const { rowIdForPreview, setRowIdForPreview, clearRowPreview } = useMainStore(
+    (s) => s,
+  );
+  switch (keyy) {
     case "more":
       return (
         <MenuTrigger>
@@ -66,15 +75,22 @@ const cellByKey = (key: any, item: Character) => {
 
     case "action":
       return (
-        <ActionButton
+        <ToggleButton
           UNSAFE_className="action-button"
           isQuiet
+          isSelected={rowIdForPreview === item.name}
+          onChange={(e) =>
+            e ? setRowIdForPreview(item.name) : clearRowPreview()
+          }
           UNSAFE_style={{
-            display: "var(--hover-button-display)",
+            display:
+              rowIdForPreview !== item.name
+                ? "var(--hover-button-display)"
+                : "inline-block",
           }}
         >
           <PrintPreview />
-        </ActionButton>
+        </ToggleButton>
       );
 
     case "name":
@@ -84,12 +100,12 @@ const cellByKey = (key: any, item: Character) => {
           isQuiet
           UNSAFE_style={{ color: "black" }}
         >
-          {item[key as keyof Character]}
+          {item[keyy as keyof Character]}
         </Link>
       );
 
     default:
-      return <>{item[key as keyof Character]}</>;
+      return <>{item[keyy as keyof Character]}</>;
   }
 };
 
@@ -107,6 +123,8 @@ export default withPageAuthRequired(
       setContentCursor,
       setContentScrollPosition,
       contentScrollPosition,
+      clearRowPreview,
+      rowIdForPreview,
     } = useMainStore((state) => state);
 
     // Columns for the table
@@ -134,13 +152,14 @@ export default withPageAuthRequired(
         appendContents(json.results);
 
         return {
-          items: json.results,
+          items: [],
           cursor: json.next,
         };
       },
     });
 
-    useEffect(() => {
+    // Cache this guy anyway
+    const trackScrollPosition = useCallback(() => {
       const table = (
         tableRef.current as any
       ).UNSAFE_getDOMNode() as HTMLDivElement;
@@ -148,13 +167,16 @@ export default withPageAuthRequired(
       body?.scrollTo({ top: contentScrollPosition });
       function onscroll() {
         const curr = body?.scrollTop || 0;
-        if (curr !== 0) {
-          setContentScrollPosition(curr);
-        }
+        setContentScrollPosition(curr);
       }
       body?.addEventListener("scroll", onscroll);
-      return () => body?.removeEventListener("scroll", onscroll);
+      return () => {
+        body?.removeEventListener("scroll", onscroll);
+        clearRowPreview(); // Yah!
+      };
     }, []);
+
+    useEffect(trackScrollPosition, []);
 
     return (
       <Flex direction="row" height="calc(100vh - 90px)" gap="size-300">
@@ -213,7 +235,11 @@ export default withPageAuthRequired(
               >
                 {(item) => (
                   <Row key={item.name}>
-                    {(key) => <Cell>{cellByKey(key, item)}</Cell>}
+                    {(key) => (
+                      <Cell>
+                        <CellByKey keyy={key} item={item} />
+                      </Cell>
+                    )}
                   </Row>
                 )}
               </TableBody>
@@ -245,18 +271,29 @@ export default withPageAuthRequired(
             </TabList>
             <TabPanels>
               <Item>
-                <IllustratedMessage>
-                  <NoSearchResults />
-                  <Heading>It&apos;s empty here</Heading>
-                  <Content>Select a row to preview.</Content>
-                </IllustratedMessage>
+                {rowIdForPreview ? (
+                  <div>You selected post {rowIdForPreview} for preview</div>
+                ) : (
+                  <IllustratedMessage>
+                    <NoSearchResults />
+                    <Heading>It&apos;s empty here</Heading>
+                    <Content>Select a row to preview.</Content>
+                  </IllustratedMessage>
+                )}
               </Item>
               <Item>
-                <IllustratedMessage>
-                  <NoSearchResults />
-                  <Heading>It&apos;s empty here</Heading>
-                  <Content>Select a row to preview.</Content>
-                </IllustratedMessage>
+                {rowIdForPreview ? (
+                  <div>
+                    There&apos;s more to preview for this post! Comming very
+                    soon!
+                  </div>
+                ) : (
+                  <IllustratedMessage>
+                    <NoSearchResults />
+                    <Heading>It&apos;s empty here</Heading>
+                    <Content>Try to choose one?</Content>
+                  </IllustratedMessage>
+                )}
               </Item>
             </TabPanels>
           </Tabs>

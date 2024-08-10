@@ -4,15 +4,13 @@ import { usePageMeta } from "@/app/hooks/pageMeta";
 import { useMainStore } from "@/stores/providers/main-store";
 import { withPageAuthRequired } from "@auth0/nextjs-auth0/client";
 
-export default withPageAuthRequired(function ContentDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default withPageAuthRequired(function ContentDraftsPage() {
+  usePageMeta({ title: "Create a new content" });
   const setActiveContentId = useMainStore((s) => s.setActiveContentId);
-  usePageMeta({ title: `Editing post with ID ${params.id}` });
-  setActiveContentId(params.id);
-  return <div>My Post: {params.id}</div>;
+  setActiveContentId(null);
+  return (
+    <div>Feel free to add things you need to post! Ah yeah, you can&apos;t</div>
+  );
 });
 
 export const runtime = "edge";

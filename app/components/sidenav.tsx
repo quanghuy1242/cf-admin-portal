@@ -33,7 +33,9 @@ interface Route {
 
 const SideNavActual = () => {
   const [selectedSideNavItem, setSelectedSideNavItem] = useState("/");
-  const { pageMeta, resetPageMeta } = useMainStore((state) => state);
+  const { pageMeta, resetPageMeta, activeContentId } = useMainStore(
+    (state) => state,
+  );
   const routers: Route[] = [
     {
       label: "Home",
@@ -67,7 +69,9 @@ const SideNavActual = () => {
         {
           label: "Content Editor",
           icon: <IconTextEdit slot="icon" />,
-          href: "/content/editor",
+          href: activeContentId
+            ? `/content/${activeContentId}`
+            : "/content/new",
         },
       ],
     },
@@ -198,7 +202,6 @@ const SideNavActual = () => {
             selected={r.href === selectedSideNavItem}
             onClick={(e) => {
               e.preventDefault();
-              setSelectedSideNavItem(r.href || "/");
               router.push(r.href || "/", {
                 scroll: false,
               });

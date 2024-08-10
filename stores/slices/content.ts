@@ -6,6 +6,8 @@ export type ContentState = {
   contentStorage: Character[];
   contentCursor: string;
   contentScrollPosition: number;
+  rowIdForPreview?: string | null;
+  activeContentId: string | null;
 };
 
 export interface Character {
@@ -20,6 +22,9 @@ export type ContentAction = {
   appendContents: (contents: Character[]) => void;
   setContentCursor: (cursor: string) => void;
   setContentScrollPosition: (p: number) => void;
+  setRowIdForPreview: (rowId: string) => void;
+  clearRowPreview: () => void;
+  setActiveContentId: (id: string | null) => void;
 };
 
 export type ContentSlice = ContentState & ContentAction;
@@ -29,6 +34,7 @@ export const defaultInitState: ContentState = {
   contentStorage: [],
   contentCursor: "https://swapi.py4e.com/api/people/?search=",
   contentScrollPosition: 0,
+  activeContentId: null,
 };
 
 export const createContentSlice: (
@@ -57,6 +63,18 @@ export const createContentSlice: (
     setContentScrollPosition: (p: number) =>
       set((state) => {
         state.contentScrollPosition = p;
+      }),
+    setRowIdForPreview: (rowId: string) =>
+      set((state) => {
+        state.rowIdForPreview = rowId;
+      }),
+    clearRowPreview: () =>
+      set((state) => {
+        state.rowIdForPreview = null;
+      }),
+    setActiveContentId: (id: string | null) =>
+      set((state) => {
+        state.activeContentId = id;
       }),
   });
 };

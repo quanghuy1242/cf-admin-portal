@@ -22,7 +22,7 @@ export const CreateButtonMain = () => {
       </Button>
       <Menu minWidth={200}>
         <Section>
-          <Item key="content">
+          <Item key="content" href="/content/new">
             <FileSingleWebPage />
             <Text>Write a post</Text>
           </Item>
