@@ -1,9 +1,10 @@
 "use client";
 
 import { usePageMeta } from "../hooks/pageMeta";
+import { fetcher } from "../utils/swc";
 import "./page.css";
 import { useMainStore } from "@/stores/providers/main-store";
-import { Character } from "@/stores/slices/content";
+import { ICategory, IContent } from "@/stores/slices/content";
 import {
   ActionBar,
   ActionBarContainer,
@@ -38,16 +39,20 @@ import Edit from "@spectrum-icons/workflow/Edit";
 import MoreVertical from "@spectrum-icons/workflow/MoreVertical";
 import PrintPreview from "@spectrum-icons/workflow/PrintPreview";
 import { useCallback, useEffect, useRef, useState } from "react";
+import useSWR from "swr";
 
 interface IAB {
   keyy: any;
-  item: Character;
+  item: IContent;
 }
 
 const CellByKey = ({ keyy, item }: IAB) => {
-  const { rowIdForPreview, setRowIdForPreview, clearRowPreview } = useMainStore(
-    (s) => s,
-  );
+  const {
+    rowIdForPreview,
+    setRowIdForPreview,
+    clearRowPreview,
+    categoryStorage,
+  } = useMainStore((s) => s);
   switch (keyy) {
     case "more":
       return (
@@ -65,7 +70,7 @@ const CellByKey = ({ keyy, item }: IAB) => {
       );
 
     case "status":
-      const isDrafting = item["height"] < 170;
+      const isDrafting = item.status === "PENDING";
       return (
         <StatusLight variant={isDrafting ? "yellow" : "positive"}>
           {isDrafting ? "Drafting" : "Published"}
@@ -77,13 +82,13 @@ const CellByKey = ({ keyy, item }: IAB) => {
         <ToggleButton
           UNSAFE_className="action-button"
           isQuiet
-          isSelected={rowIdForPreview === item.name}
+          isSelected={rowIdForPreview === item.id}
           onChange={(e) =>
-            e ? setRowIdForPreview(item.name) : clearRowPreview()
+            e ? setRowIdForPreview(item.id) : clearRowPreview()
           }
           UNSAFE_style={{
             display:
-              rowIdForPreview !== item.name
+              rowIdForPreview !== item.id
                 ? "var(--hover-button-display)"
                 : "inline-block",
           }}
@@ -92,19 +97,25 @@ const CellByKey = ({ keyy, item }: IAB) => {
         </ToggleButton>
       );
 
-    case "name":
+    case "title":
       return (
         <Link
-          href={`/content/${item["height"]}`}
+          href={`/content/${item.id}`}
           isQuiet
           UNSAFE_style={{ color: "black" }}
         >
-          {item[keyy as keyof Character]}
+          {item.title}
         </Link>
       );
 
+    case "categoryId":
+      return <>{categoryStorage[item.categoryId]?.name || ""}</>;
+
+    case "modified":
+      return <>{new Date(item.modified).toLocaleString()}</>;
+
     default:
-      return <>{item[keyy as keyof Character]}</>;
+      return <>{item[keyy as keyof IContent]}</>;
   }
 };
 
@@ -123,20 +134,33 @@ export default function ContentListPage() {
     contentScrollPosition,
     clearRowPreview,
     rowIdForPreview,
+    appendCategorioes,
+    categoryStorage,
   } = useMainStore((state) => state);
+
+  const { data: categories } = useSWR(
+    Object.keys(categoryStorage).length === 0 ? "/api/category" : null,
+    fetcher,
+  );
+
+  useEffect(() => {
+    if (categories) {
+      appendCategorioes((categories as any).results as ICategory[]);
+    }
+  }, [categories]);
 
   // Columns for the table
   let columns = [
-    { name: "Name", key: "name" },
+    { name: "Title", key: "title" },
     { name: "Action", key: "action" },
     { name: "Status", key: "status" },
-    { name: "Height", key: "height" },
-    { name: "Birth Year", key: "birth_year" },
+    { name: "Category", key: "categoryId" },
+    { name: "Latest date", key: "modified" },
     { name: "More", key: "more" },
   ];
 
   // The loader
-  const _list = useAsyncList<Character>({
+  const _list = useAsyncList<IContent>({
     async load({ signal, cursor }) {
       if (cursor) {
         cursor = cursor.replace(/^http:\/\//i, "https://");
@@ -219,6 +243,7 @@ export default function ContentListPage() {
                     {
                       more: 100,
                       action: 50,
+                      title: 300,
                     }[column.key] || null
                   }
                 >
@@ -232,7 +257,7 @@ export default function ContentListPage() {
               onLoadMore={_list.loadMore}
             >
               {(item) => (
-                <Row key={item.name}>
+                <Row key={item.id}>
                   {(key) => (
                     <Cell>
                       <CellByKey keyy={key} item={item} />

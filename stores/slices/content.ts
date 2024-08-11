@@ -3,23 +3,41 @@ import { type Selection } from "@adobe/react-spectrum";
 
 export type ContentState = {
   selectedRowIds: Selection;
-  contentStorage: Character[];
+  contentStorage: IContent[];
+  categoryStorage: { [key: string]: ICategory };
   contentCursor: string;
   contentScrollPosition: number;
   rowIdForPreview?: string | null;
   activeContentId: string | null;
 };
 
-export interface Character {
+export interface IContent {
+  id: string;
+  categoryId: string;
+  content: string;
+  coverImage: string;
+  created: string;
+  metadata: { [key: string]: string };
+  modified: string;
+  slug: string;
+  status: string;
+  tags: string[];
+  title: string;
+  userId: string;
+}
+
+export interface ICategory {
+  id: string;
   name: string;
-  height: number;
-  birth_year: number;
+  description: string;
+  status: string;
 }
 
 export type ContentAction = {
   setSelectedRowIds: (rowId: Selection) => void;
   clearSelectedRowIds: () => void;
-  appendContents: (contents: Character[]) => void;
+  appendContents: (contents: IContent[]) => void;
+  appendCategorioes: (categories: ICategory[]) => void;
   setContentCursor: (cursor: string) => void;
   setContentScrollPosition: (p: number) => void;
   setRowIdForPreview: (rowId: string) => void;
@@ -32,7 +50,8 @@ export type ContentSlice = ContentState & ContentAction;
 export const defaultInitState: ContentState = {
   selectedRowIds: new Set<string>(),
   contentStorage: [],
-  contentCursor: "https://swapi.py4e.com/api/people/?search=",
+  categoryStorage: {},
+  contentCursor: "/api/content",
   contentScrollPosition: 0,
   activeContentId: null,
 };
@@ -52,9 +71,15 @@ export const createContentSlice: (
       set((state) => {
         state.selectedRowIds = defaultInitState.selectedRowIds;
       }),
-    appendContents: (contents: Character[]) =>
+    appendContents: (contents: IContent[]) =>
       set((state) => {
         state.contentStorage.push(...contents);
+      }),
+    appendCategorioes: (categories: ICategory[]) =>
+      set((state) => {
+        categories.forEach((c) => {
+          state.categoryStorage[c.id] = c;
+        });
       }),
     setContentCursor: (cursor: string) =>
       set((state) => {

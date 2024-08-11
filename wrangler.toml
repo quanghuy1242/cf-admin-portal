@@ -22,6 +22,7 @@ AUTH0_ISSUER_BASE_URL='https://quanghuy1242.us.auth0.com'
 AUTH0_CLIENT_ID='YGHZtDMecXvfXRywQedCLULlV1PirTkx'
 AUTH0_SESSION_AUTO_SAVE=false
 AUTH0_AUDIENCE='https://api.quanghuy.dev'
+CONTENT_API='https://cf-blog-api-staging.quanghuy1242.workers.dev/api/v1'
 
 # Bind the Workers AI model catalog. Run machine learning models, powered by serverless GPUs, on Cloudflare’s global network
 # Docs: https://developers.cloudflare.com/pages/functions/bindings/#workers-ai

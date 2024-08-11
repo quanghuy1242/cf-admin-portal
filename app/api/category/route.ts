@@ -1,13 +1,13 @@
+import { withPagination } from "../helpers/pagination";
 import { withApiAuthRequired, getSession } from "@auth0/nextjs-auth0/edge";
 import { NextResponse, type NextRequest } from "next/server";
 import { env } from "process";
-import { withPagination } from "../helpers/pagination";
 
 export const GET = withApiAuthRequired(async (request: NextRequest) => {
   // Extract wanted page and pageSize
   const params = new URLSearchParams(new URL(request.url).search);
   const page = Number.parseInt(params.get("page") || "1");
-  const pageSize = Number.parseInt(params.get("pageSize") || "10");
+  const pageSize = Number.parseInt(params.get("pageSize") || "100");
 
   // Grab the access token
   const response = new NextResponse();
@@ -15,12 +15,9 @@ export const GET = withApiAuthRequired(async (request: NextRequest) => {
   if (!session) {
     return Response.json({ message: "Bad" }, { status: 401 });
   }
-  const { user, accessToken } = session;
-  const contents = await fetch(
-    env.CONTENT_API +
-      "/contents?" +
-      withPagination(page, pageSize) +
-      `&userId=${user.sub}`,
+  const { accessToken } = session;
+  const categories = await fetch(
+    env.CONTENT_API + "/categories?" + withPagination(page, pageSize),
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -32,24 +29,16 @@ export const GET = withApiAuthRequired(async (request: NextRequest) => {
     return Response.json(
       {
         message: "There something wrong",
-        error: await contents.json(),
+        error: await categories.json(),
       },
       {
         status: 400,
       },
     );
   }
-
-  // Calculate for the next one
-  const pageCount = Number.parseInt(
-    contents.headers.get("x-page-count") || "1",
-  );
   return Response.json({
-    results: await contents.json(),
-    next:
-      page < pageCount
-        ? "/api/content?" + withPagination(page, pageSize)
-        : null,
+    results: await categories.json(),
+    next: null,
   });
 });
 
