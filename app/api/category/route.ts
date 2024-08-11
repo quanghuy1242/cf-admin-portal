@@ -1,5 +1,6 @@
 import { withPagination } from "../helpers/pagination";
 import { withApiAuthRequired, getSession } from "@auth0/nextjs-auth0/edge";
+import { getRequestContext } from "@cloudflare/next-on-pages";
 import { NextResponse, type NextRequest } from "next/server";
 import { env } from "process";
 
@@ -16,8 +17,8 @@ export const GET = withApiAuthRequired(async (request: NextRequest) => {
     return Response.json({ message: "Bad" }, { status: 401 });
   }
   const { accessToken } = session;
-  const categories = await fetch(
-    env.CONTENT_API + "/categories?" + withPagination(page, pageSize),
+  const categories = await getRequestContext().env.CONTENT.fetch(
+    env.CONTENT_API + "/api/v1/categories?" + withPagination(page, pageSize),
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,

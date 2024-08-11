@@ -22,7 +22,15 @@ AUTH0_ISSUER_BASE_URL='https://quanghuy1242.us.auth0.com'
 AUTH0_CLIENT_ID='YGHZtDMecXvfXRywQedCLULlV1PirTkx'
 AUTH0_SESSION_AUTO_SAVE=false
 AUTH0_AUDIENCE='https://api.quanghuy.dev'
-CONTENT_API='https://cf-blog-api-staging.quanghuy1242.workers.dev/api/v1'
+CONTENT_API='https://api.content.quanghuy.dev'
+
+[env.preview.vars]
+# AUTH0_BASE_URL='https://admin-next.quanghuy.dev'
+AUTH0_ISSUER_BASE_URL='https://quanghuy1242.us.auth0.com'
+AUTH0_CLIENT_ID='YGHZtDMecXvfXRywQedCLULlV1PirTkx'
+AUTH0_SESSION_AUTO_SAVE=false
+AUTH0_AUDIENCE='https://api.quanghuy.dev'
+CONTENT_API='https://cf-blog-api-staging.quanghuy1242.workers.dev'
 
 # Bind the Workers AI model catalog. Run machine learning models, powered by serverless GPUs, on Cloudflare’s global network
 # Docs: https://developers.cloudflare.com/pages/functions/bindings/#workers-ai
@@ -65,9 +73,14 @@ CONTENT_API='https://cf-blog-api-staging.quanghuy1242.workers.dev/api/v1'
 
 # Bind another Worker service. Use this binding to call another Worker without network overhead.
 # Docs: https://developers.cloudflare.com/pages/functions/bindings/#service-bindings
-# [[services]]
-# binding = "MY_SERVICE"
-# service = "my-service"
+[[services]]
+binding = "CONTENT"
+service = "cf-blog-api"
+
+[[env.preview.services]]
+binding = "CONTENT"
+service = "cf-blog-api-staging"
+
 
 # To use different bindings for preview and production environments, follow the examples below.
 # When using environment-specific overrides for bindings, ALL bindings must be specified on a per-environment basis.

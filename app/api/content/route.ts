@@ -1,7 +1,8 @@
+import { withPagination } from "../helpers/pagination";
 import { withApiAuthRequired, getSession } from "@auth0/nextjs-auth0/edge";
+import { getRequestContext } from "@cloudflare/next-on-pages";
 import { NextResponse, type NextRequest } from "next/server";
 import { env } from "process";
-import { withPagination } from "../helpers/pagination";
 
 export const GET = withApiAuthRequired(async (request: NextRequest) => {
   // Extract wanted page and pageSize
@@ -16,9 +17,9 @@ export const GET = withApiAuthRequired(async (request: NextRequest) => {
     return Response.json({ message: "Bad" }, { status: 401 });
   }
   const { user, accessToken } = session;
-  const contents = await fetch(
+  const contents = await getRequestContext().env.CONTENT.fetch(
     env.CONTENT_API +
-      "/contents?" +
+      "/api/v1/contents?" +
       withPagination(page, pageSize) +
       `&userId=${user.sub}`,
     {
