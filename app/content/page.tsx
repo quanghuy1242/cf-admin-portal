@@ -228,7 +228,7 @@ export default function ContentListPage() {
   }, [contentStorage, editor, rowIdForPreview]);
 
   return (
-    <Flex direction="row" height="calc(100vh - 90px)" gap="size-300">
+    <Flex direction="row" height="calc(100vh - 75px)" gap="size-300">
       <Flex
         direction={"column"}
         gap={10}
@@ -250,7 +250,7 @@ export default function ContentListPage() {
             </ComboBox>
           </Flex>
         </Flex>
-        <ActionBarContainer height="calc(100vh - 150px)">
+        <ActionBarContainer height="calc(100vh - 140px)">
           <TableView
             UNSAFE_className="content-table"
             aria-label="example async loading table"
@@ -325,8 +325,8 @@ export default function ContentListPage() {
                 <div
                   style={{
                     overflow: "auto",
-                    height: "calc(100vh - 150px)",
-                    paddingRight: 10
+                    height: "calc(100vh - 140px)",
+                    paddingRight: 10,
                   }}
                 >
                   <h1>{contentStorage[rowIdForPreview].title}</h1>
@@ -348,7 +348,7 @@ export default function ContentListPage() {
               {rowIdForPreview ? (
                 <div
                   style={{
-                    height: "calc(100vh - 150px)",
+                    height: "calc(100vh - 140px)",
                     overflow: "auto",
                   }}
                 >
