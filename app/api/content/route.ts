@@ -1,10 +1,10 @@
 import { withPagination } from "../helpers/pagination";
-import { withApiAuthRequired, getSession } from "@auth0/nextjs-auth0/edge";
+import { getSession } from "@auth0/nextjs-auth0/edge";
 import { getRequestContext } from "@cloudflare/next-on-pages";
 import { NextResponse, type NextRequest } from "next/server";
 import { env } from "process";
 
-export const GET = withApiAuthRequired(async (request: NextRequest) => {
+export const GET = async (request: NextRequest) => {
   // Extract wanted page and pageSize
   const params = new URLSearchParams(new URL(request.url).search);
   const page = Number.parseInt(params.get("page") || "1");
@@ -52,6 +52,6 @@ export const GET = withApiAuthRequired(async (request: NextRequest) => {
         ? "/api/content?" + withPagination(page, pageSize)
         : null,
   });
-});
+};
 
 export const runtime = "edge";

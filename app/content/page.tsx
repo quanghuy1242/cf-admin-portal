@@ -3,6 +3,7 @@
 import { usePageMeta } from "../hooks/pageMeta";
 import { fetcher } from "../utils/swc";
 import "./page.css";
+import lexicalNodes from "@/editor/nodes";
 import { useMainStore } from "@/stores/providers/main-store";
 import { ICategory, IContent } from "@/stores/slices/content";
 import {
@@ -16,7 +17,9 @@ import {
   Flex,
   Heading,
   IllustratedMessage,
+  Image,
   Item,
+  LabeledValue,
   Link,
   Menu,
   MenuTrigger,
@@ -33,6 +36,8 @@ import {
   ToggleButton,
   useAsyncList,
 } from "@adobe/react-spectrum";
+import { createHeadlessEditor } from "@lexical/headless";
+import { $generateHtmlFromNodes } from "@lexical/html";
 import NoSearchResults from "@spectrum-icons/illustrations/NoSearchResults";
 import Delete from "@spectrum-icons/workflow/Delete";
 import Edit from "@spectrum-icons/workflow/Edit";
@@ -197,8 +202,30 @@ export default function ContentListPage() {
       clearRowPreview(); // Yah!
     };
   }, []);
-
   useEffect(trackScrollPosition, []);
+
+  // To another hook
+  const [previewHTML, setPreviewHTML] = useState("");
+  const editor = createHeadlessEditor({
+    nodes: [...lexicalNodes],
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+  useEffect(() => {
+    if (rowIdForPreview) {
+      const body = JSON.stringify(
+        JSON.parse(contentStorage[rowIdForPreview].content).editorState,
+      );
+      editor.setEditorState(editor.parseEditorState(body));
+      editor.update(() => {
+        const html = $generateHtmlFromNodes(editor);
+        setPreviewHTML(html);
+      });
+    } else {
+      setPreviewHTML("");
+    }
+  }, [contentStorage, editor, rowIdForPreview]);
 
   return (
     <Flex direction="row" height="calc(100vh - 90px)" gap="size-300">
@@ -252,7 +279,7 @@ export default function ContentListPage() {
               )}
             </TableHeader>
             <TableBody
-              items={contentStorage}
+              items={Object.values(contentStorage)}
               loadingState={_list.loadingState}
               onLoadMore={_list.loadMore}
             >
@@ -295,7 +322,20 @@ export default function ContentListPage() {
           <TabPanels>
             <Item>
               {rowIdForPreview ? (
-                <div>You selected post {rowIdForPreview} for preview</div>
+                <div
+                  style={{
+                    overflow: "auto",
+                    height: "calc(100vh - 150px)",
+                    paddingRight: 10
+                  }}
+                >
+                  <h1>{contentStorage[rowIdForPreview].title}</h1>
+                  <Image
+                    src={contentStorage[rowIdForPreview].coverImage}
+                    alt="ALTT"
+                  />
+                  <div dangerouslySetInnerHTML={{ __html: previewHTML }}></div>
+                </div>
               ) : (
                 <IllustratedMessage>
                   <NoSearchResults />
@@ -306,8 +346,34 @@ export default function ContentListPage() {
             </Item>
             <Item>
               {rowIdForPreview ? (
-                <div>
-                  There&apos;s more to preview for this post! Comming very soon!
+                <div
+                  style={{
+                    height: "calc(100vh - 150px)",
+                    overflow: "auto",
+                  }}
+                >
+                  <Flex direction="column" gap={10} marginY={10}>
+                    <LabeledValue
+                      label="Title"
+                      value={contentStorage[rowIdForPreview].title}
+                    />
+                    <Image
+                      src={contentStorage[rowIdForPreview].coverImage}
+                      alt="ALT"
+                    />
+                    <LabeledValue
+                      label="Modified"
+                      value={new Date(
+                        contentStorage[rowIdForPreview].modified,
+                      ).toLocaleString()}
+                    />
+                    <LabeledValue
+                      label="Created"
+                      value={new Date(
+                        contentStorage[rowIdForPreview].created,
+                      ).toLocaleString()}
+                    />
+                  </Flex>
                 </div>
               ) : (
                 <IllustratedMessage>

@@ -3,7 +3,7 @@ import { type Selection } from "@adobe/react-spectrum";
 
 export type ContentState = {
   selectedRowIds: Selection;
-  contentStorage: IContent[];
+  contentStorage: { [key: string]: IContent };
   categoryStorage: { [key: string]: ICategory };
   contentCursor: string;
   contentScrollPosition: number;
@@ -49,7 +49,7 @@ export type ContentSlice = ContentState & ContentAction;
 
 export const defaultInitState: ContentState = {
   selectedRowIds: new Set<string>(),
-  contentStorage: [],
+  contentStorage: {},
   categoryStorage: {},
   contentCursor: "/api/content",
   contentScrollPosition: 0,
@@ -73,7 +73,9 @@ export const createContentSlice: (
       }),
     appendContents: (contents: IContent[]) =>
       set((state) => {
-        state.contentStorage.push(...contents);
+        contents.forEach((c) => {
+          state.contentStorage[c.id] = c;
+        });
       }),
     appendCategorioes: (categories: ICategory[]) =>
       set((state) => {
