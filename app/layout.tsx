@@ -71,7 +71,7 @@ const ProtectedLayout = ({ children }: PropsWithChildren) => {
                 </View>
                 <View
                   width={"100%"}
-                  height="calc(100vh - 75px)"
+                  height="calc(100vh - 70px)"
                   overflow="auto"
                   paddingX={10}
                   // paddingBottom={10}

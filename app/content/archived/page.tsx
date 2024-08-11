@@ -1,6 +1,6 @@
 "use client";
 
-import { usePageMeta } from "@/app/hooks/pageMeta";
+import { usePageMeta } from "@/app/hooks/use-page-meta";
 
 export default function ContentDraftsPage() {
   usePageMeta({ title: "Archived content" });

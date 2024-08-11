@@ -45,7 +45,7 @@ const SideNavActual = () => {
     {
       label: "Feed",
       icon: <IconNews slot="icon" />,
-      href: "/Feed",
+      href: "/feed",
     },
     {
       label: "Contents",

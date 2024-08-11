@@ -1,6 +1,6 @@
 "use client";
 
-import { usePageMeta } from "@/app/hooks/pageMeta";
+import { usePageMeta } from "@/app/hooks/use-page-meta";
 import { useMainStore } from "@/stores/providers/main-store";
 
 export default function ContentDraftsPage() {

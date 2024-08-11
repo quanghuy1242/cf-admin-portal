@@ -1,6 +1,6 @@
 "use client";
 
-import { usePageMeta } from "./hooks/pageMeta";
+import { usePageMeta } from "./hooks/use-page-meta";
 import { useMainStore } from "@/stores/providers/main-store";
 import {
   ActionButton,
