@@ -4,7 +4,7 @@ import { useCategories } from "../hooks/use-category";
 import { useContent } from "../hooks/use-content";
 import { usePageMeta } from "../hooks/use-page-meta";
 import { useTrackingScroll } from "../hooks/use-scroll-position";
-import { IColumnContent, TableContent } from "./components/table";
+import { CategoryCell, IColumnContent, TableContent } from "./components/table";
 import { PreviewButton, PreviewPannel } from "./components/table-row-preview";
 import { TableContentToolbar } from "./components/table-toolbar";
 import "./page.css";
@@ -13,11 +13,14 @@ import { IContent } from "@/stores/slices/content";
 import {
   ActionButton,
   Flex,
+  Image,
   Item,
   Link,
   Menu,
   MenuTrigger,
   StatusLight,
+  Tooltip,
+  TooltipTrigger,
 } from "@adobe/react-spectrum";
 import MoreVertical from "@spectrum-icons/workflow/MoreVertical";
 import { useEffect, useRef } from "react";
@@ -29,7 +32,6 @@ export default function ContentListPage() {
     setSelectedRowIds,
     clearSelectedRowIds,
     clearRowPreview,
-    categoryStorage,
   } = useMainStore((state) => state);
 
   useCategories();
@@ -45,17 +47,28 @@ export default function ContentListPage() {
 
   const columns: IColumnContent[] = [
     {
+      key: "image",
+      name: "Thumbnail",
+      hideHeader: true,
+      render: (_, item: IContent) => (
+        <Image src={item.coverImage} alt={item.title} />
+      ),
+    },
+    {
       key: "title",
       name: "Title",
       width: 300,
       render: (_, item: IContent) => (
-        <Link
-          href={`/content/${item.id}`}
-          isQuiet
-          UNSAFE_style={{ color: "black" }}
-        >
-          {item.title}
-        </Link>
+        <TooltipTrigger delay={1000} crossOffset={50} placement="bottom start">
+          <Link
+            href={`/content/${item.id}`}
+            isQuiet
+            UNSAFE_style={{ color: "black" }}
+          >
+            {item.title}
+          </Link>
+          <Tooltip>{item.title}</Tooltip>
+        </TooltipTrigger>
       ),
     },
     {
@@ -81,9 +94,7 @@ export default function ContentListPage() {
     {
       key: "categoryId",
       name: "Category",
-      render: (_, item: IContent) => (
-        <>{categoryStorage[item.categoryId]?.name || ""}</>
-      ),
+      render: (_, item: IContent) => <CategoryCell item={item} />,
     },
     {
       key: "modified",

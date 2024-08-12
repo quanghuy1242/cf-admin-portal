@@ -9,10 +9,12 @@ import {
   ProgressCircle,
   Text,
 } from "@adobe/react-spectrum";
+import { useUser } from "@auth0/nextjs-auth0/client";
 import Home from "@spectrum-icons/workflow/Home";
 import { TopNav, TopNavItem } from "@swc-react/top-nav/next.js";
 
 const TopNavActual = () => {
+  const { user } = useUser();
   return (
     <TopNav shouldAnimate>
       <ActionButton isQuiet>
@@ -24,7 +26,11 @@ const TopNavActual = () => {
       </TopNavItem>
       <MenuTrigger>
         <ActionButton isQuiet justifySelf={"right"}>
-          <Avatar src="https://contents.quanghuy.dev/birdless-sky-300-1.png" />
+          <Avatar size="avatar-size-400"
+            src={
+              user?.picture || "https://contents.quanghuy.dev/empty-avatar.webp"
+            }
+          />
         </ActionButton>
         <Menu
           onAction={(e) => {

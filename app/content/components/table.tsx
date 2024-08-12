@@ -18,7 +18,7 @@ import {
 } from "@adobe/react-spectrum";
 import Delete from "@spectrum-icons/workflow/Delete";
 import Edit from "@spectrum-icons/workflow/Edit";
-import { forwardRef, ReactNode, Ref } from "react";
+import { ReactNode, Ref } from "react";
 
 export interface IColumnContent {
   name: string;
@@ -124,4 +124,9 @@ export const TableContent = ({
       </ActionBar>
     </ActionBarContainer>
   );
+};
+
+export const CategoryCell = ({ item }: { item: IContent }) => {
+  const { categoryStorage } = useMainStore((state) => state);
+  return <>{categoryStorage[item.categoryId]?.name || ""}</>;
 };
