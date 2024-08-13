@@ -10,6 +10,7 @@ import {
   InitialConfigType,
 } from "@lexical/react/LexicalComposer";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
+import { EditorRefPlugin } from "@lexical/react/LexicalEditorRefPlugin";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { HashtagPlugin } from "@lexical/react/LexicalHashtagPlugin";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
@@ -19,13 +20,16 @@ import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { TabIndentationPlugin } from "@lexical/react/LexicalTabIndentationPlugin";
 import { TablePlugin } from "@lexical/react/LexicalTablePlugin";
 import { LexicalEditor } from "lexical";
+import { RefObject } from "react";
 
 export const Editor = ({
   editorState,
   ready,
+  rref,
 }: {
   editorState?: string | null;
   ready: boolean;
+  rref: RefObject<LexicalEditor>;
 }) => {
   const initialConfig: InitialConfigType = {
     editable: false,
@@ -39,13 +43,13 @@ export const Editor = ({
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
-      <div className="rounded-sm rounded-tl-xl flex-grow text-black relative leading-5 text-left font-[400]">
+      <div className="rounded-sm rounded-tl-xl flex-grow">
         <ToolbarEditor ready={ready} />
         <div className="bg-white relative overflow-auto h-[calc(100vh-110px)]">
           <RichTextPlugin
             contentEditable={
               <ContentEditable
-                className="min-h-[150] resize-none text-sm caret-slate-800 relative outline-0 p-4"
+                className="min-h-[150] resize-none text-sm caret-slate-800 relative outline-0 p-4 leading-6 font-normal"
                 aria-placeholder={"Typing something"}
                 placeholder={
                   <div className="text-gray-500 overflow-hidden absolute top-4 left-4 text-sm select-none inline-block pointer-events-none">
@@ -56,6 +60,7 @@ export const Editor = ({
             }
             ErrorBoundary={LexicalErrorBoundary}
           />
+          <EditorRefPlugin editorRef={rref} />
           <RestoreInputPlugin editorState={editorState} />
           <HistoryPlugin />
           <AutoFocusPlugin />

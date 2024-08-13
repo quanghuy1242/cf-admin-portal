@@ -17,7 +17,8 @@ import {
   TextField,
   View,
 } from "@adobe/react-spectrum";
-import { useEffect, useState } from "react";
+import { LexicalEditor } from "lexical";
+import { useEffect, useRef, useState } from "react";
 
 export default function ContentDetailPage({
   params,
@@ -30,7 +31,9 @@ export default function ContentDetailPage({
     appendContents,
     categoryStorage,
   } = useMainStore((s) => s);
+
   const [isEditorReady, setEditorReady] = useState(false);
+  const editor = useRef<LexicalEditor>(null);
   usePageMeta({ title: `Editing post with ID ${params.id}` });
   useCategories();
   setActiveContentId(params.id);
@@ -53,6 +56,7 @@ export default function ContentDetailPage({
     <Flex>
       <Editor
         ready={isEditorReady}
+        rref={editor}
         editorState={
           contentStorage[params.id]
             ? JSON.stringify(
@@ -126,7 +130,14 @@ export default function ContentDetailPage({
           </View>
           <Flex>
             <View flexGrow={1}></View>
-            <Button variant="accent">Save</Button>
+            <Button
+              variant="accent"
+              onPress={() => {
+                alert(JSON.stringify(editor.current?.toJSON() || {}));
+              }}
+            >
+              Save
+            </Button>
           </Flex>
         </Flex>
       </View>
