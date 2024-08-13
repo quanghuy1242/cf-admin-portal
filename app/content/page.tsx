@@ -82,6 +82,7 @@ export default function ContentListPage() {
     {
       key: "status",
       name: "Status",
+      minWidth: 150,
       render: (_, item: IContent) => {
         const isDrafting = item.status === "PENDING";
         return (
@@ -94,6 +95,7 @@ export default function ContentListPage() {
     {
       key: "categoryId",
       name: "Category",
+      minWidth: 150,
       render: (_, item: IContent) => <CategoryCell item={item} />,
     },
     {

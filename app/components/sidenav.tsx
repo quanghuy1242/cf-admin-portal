@@ -33,9 +33,8 @@ interface Route {
 
 const SideNavActual = () => {
   const [selectedSideNavItem, setSelectedSideNavItem] = useState("/");
-  const { pageMeta, resetPageMeta, activeContentId } = useMainStore(
-    (state) => state,
-  );
+  const { pageMeta, resetPageMeta, activeContentId, setSidenavStatus } =
+    useMainStore((state) => state);
   const routers: Route[] = [
     {
       label: "Home",
@@ -169,6 +168,9 @@ const SideNavActual = () => {
       style={{
         height: "calc(100vh - 130px)",
         overflow: "auto",
+        padding: 10,
+        paddingTop: 0,
+        paddingBottom: 0,
       }}
     >
       {routers.map((r) =>
@@ -183,10 +185,10 @@ const SideNavActual = () => {
                 selected={cr.href === selectedSideNavItem}
                 onClick={(e) => {
                   e.preventDefault();
-                  // setSelectedSideNavItem(cr.href);
                   router.push(cr.href || "/", {
                     scroll: false,
                   });
+                  setSidenavStatus(false);
                 }}
               >
                 {cr.icon}
@@ -205,6 +207,7 @@ const SideNavActual = () => {
               router.push(r.href || "/", {
                 scroll: false,
               });
+              setSidenavStatus(false);
             }}
           >
             {r.icon}

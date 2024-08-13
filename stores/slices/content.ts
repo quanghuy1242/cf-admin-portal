@@ -31,6 +31,8 @@ export interface ICategory {
   name: string;
   description: string;
   status: string;
+  modified: string;
+  created: string;
 }
 
 export type ContentAction = {
@@ -76,12 +78,30 @@ export const createContentSlice: (
         contents.forEach((c) => {
           state.contentStorage[c.id] = c;
         });
+        // TODO fix this ugly sort
+        state.contentStorage = Object.fromEntries(
+          Object.entries(state.contentStorage).sort((a, b) => {
+            return (
+              new Date(b[1].modified).getTime() -
+              new Date(a[1].modified).getTime()
+            );
+          }),
+        );
       }),
     appendCategorioes: (categories: ICategory[]) =>
       set((state) => {
         categories.forEach((c) => {
           state.categoryStorage[c.id] = c;
         });
+        // TODO fix this ugly sort
+        state.categoryStorage = Object.fromEntries(
+          Object.entries(state.categoryStorage).sort((a, b) => {
+            return (
+              new Date(b[1].modified).getTime() -
+              new Date(a[1].modified).getTime()
+            );
+          }),
+        );
       }),
     setContentCursor: (cursor: string) =>
       set((state) => {

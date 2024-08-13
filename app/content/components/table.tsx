@@ -26,6 +26,7 @@ export interface IColumnContent {
   width?: number;
   hideHeader?: boolean;
   align?: "start" | "center" | "end";
+  minWidth?: number;
   render?: (key: Key, item: IContent) => ReactNode;
 }
 
@@ -88,6 +89,7 @@ export const TableContent = ({
               allowsResizing
               align={column.align || "start"}
               width={column.width || null}
+              minWidth={column.minWidth || null}
             >
               {column.name}
             </Column>

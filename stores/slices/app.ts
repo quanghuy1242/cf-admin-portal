@@ -7,12 +7,16 @@ export type PageMeta = {
 export type AppState = {
   count: number;
   pageMeta: PageMeta;
+  collapsedSidenav: boolean;
+  isOpenedSidenav: boolean;
 };
 
 export type AppAction = {
   incrementCount: () => void;
   setPageMeta: (meta: Partial<PageMeta>) => void;
   resetPageMeta: () => void;
+  setCollapsedSidenav: (shouldCollapsable: boolean) => void;
+  setSidenavStatus: (status: boolean) => void;
 };
 
 export type AppSlice = AppState & AppAction;
@@ -20,6 +24,8 @@ export type AppSlice = AppState & AppAction;
 export const defaultInitState: AppState = {
   count: 0,
   pageMeta: { title: "admin.quanghuy.dev" },
+  collapsedSidenav: false,
+  isOpenedSidenav: false,
 };
 
 export const createAppSlice: (arg0?: AppState) => ImmerStateCreator<AppSlice> =
@@ -43,5 +49,13 @@ export const createAppSlice: (arg0?: AppState) => ImmerStateCreator<AppSlice> =
     resetPageMeta: () =>
       set((state) => {
         state.pageMeta = initState.pageMeta;
+      }),
+    setCollapsedSidenav: (shouldCollapsable: boolean) =>
+      set((state) => {
+        state.collapsedSidenav = shouldCollapsable;
+      }),
+    setSidenavStatus: (status: boolean) =>
+      set((state) => {
+        state.isOpenedSidenav = status;
       }),
   });

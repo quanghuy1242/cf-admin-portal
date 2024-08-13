@@ -1,4 +1,5 @@
 import { withNoSSR } from "./nossr";
+import { useMainStore } from "@/stores/providers/main-store";
 import {
   ActionButton,
   Avatar,
@@ -10,23 +11,29 @@ import {
   Text,
 } from "@adobe/react-spectrum";
 import { useUser } from "@auth0/nextjs-auth0/client";
-import Home from "@spectrum-icons/workflow/Home";
+import Rail from "@spectrum-icons/workflow/Rail";
 import { TopNav, TopNavItem } from "@swc-react/top-nav/next.js";
 
 const TopNavActual = () => {
+  const { collapsedSidenav, setSidenavStatus, isOpenedSidenav } = useMainStore((s) => s);
   const { user } = useUser();
   return (
     <TopNav shouldAnimate>
-      <ActionButton isQuiet>
-        <Home />
-      </ActionButton>
+      {collapsedSidenav ? (
+        <ActionButton isQuiet id="sidenavtrigger" onPress={() => setSidenavStatus(!isOpenedSidenav)}>
+          <Rail />
+        </ActionButton>
+      ) : (
+        <></>
+      )}
       <TopNavItem style={{ fontWeight: "bold" }}>Admin Portal</TopNavItem>
       <TopNavItem style={{ marginInline: "auto" }}>
         <Text UNSAFE_style={{ fontSize: "1.1em" }}>Content List</Text>
       </TopNavItem>
       <MenuTrigger>
         <ActionButton isQuiet justifySelf={"right"}>
-          <Avatar size="avatar-size-400"
+          <Avatar
+            size="avatar-size-400"
             src={
               user?.picture || "https://contents.quanghuy.dev/empty-avatar.webp"
             }

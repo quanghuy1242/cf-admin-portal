@@ -69,7 +69,9 @@ export const PreviewPannel = () => {
               paddingRight: 10,
             }}
           >
-            <Heading level={2}>{contentStorage[rowIdForPreview].title}</Heading>
+            <Heading level={2} UNSAFE_className="text-2xl mb-2">
+              {contentStorage[rowIdForPreview].title}
+            </Heading>
             <Image
               src={contentStorage[rowIdForPreview].coverImage}
               alt="ALTT"

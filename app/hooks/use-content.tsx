@@ -1,20 +1,17 @@
 import { useMainStore } from "@/stores/providers/main-store";
 import { IContent } from "@/stores/slices/content";
-import { useAsyncList } from "@adobe/react-spectrum";
+import { useAsyncList, useCollator } from "@adobe/react-spectrum";
 
 export const useContent = () => {
-  const { appendContents, contentCursor, setContentCursor, contentStorage } = useMainStore(
+  const { appendContents, contentCursor, setContentCursor } = useMainStore(
     (state) => state,
   );
+  const collator = useCollator({ numeric: true });
   // The loader
   const _list = useAsyncList<IContent>({
     async load({ signal, cursor }) {
       if (cursor) {
         cursor = cursor.replace(/^http:\/\//i, "https://");
-      }
-
-      if (!cursor && Object.keys(contentStorage).length !== 0) {
-        return { items: [], cursor: null };
       }
 
       const res = await fetch(cursor || contentCursor, { signal });
@@ -28,7 +25,7 @@ export const useContent = () => {
         items: [],
         cursor: json.next,
       };
-    },
+    }
   });
   return _list;
 };

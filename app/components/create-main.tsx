@@ -1,51 +1,76 @@
+import { useMainStore } from "@/stores/providers/main-store";
+import { Button } from "@swc-react/button/next.js";
+import { IconAdd } from "@swc-react/icons-workflow/next/Add";
+import { IconBox } from "@swc-react/icons-workflow/next/Box";
+import { IconBreakdown } from "@swc-react/icons-workflow/next/Breakdown";
+import { IconCode } from "@swc-react/icons-workflow/next/Code";
+import { IconFileSingleWebPage } from "@swc-react/icons-workflow/next/FileSingleWebPage";
+import { IconImage } from "@swc-react/icons-workflow/next/Image";
 import {
-  Button,
-  Item,
-  Menu,
-  MenuTrigger,
-  Section,
-  Text,
-} from "@adobe/react-spectrum";
-import Add from "@spectrum-icons/workflow/Add";
-import IconImage from "@spectrum-icons/workflow/Image";
-import Code from "@spectrum-icons/workflow/Code";
-import Box from "@spectrum-icons/workflow/Box";
-import Breakdown from "@spectrum-icons/workflow/Breakdown";
-import FileSingleWebPage from "@spectrum-icons/workflow/FileSingleWebPage";
+  MenuItem,
+  Menu as MenuWC,
+  MenuGroup,
+  MenuDivider,
+} from "@swc-react/menu/next.js";
+import { Overlay } from "@swc-react/overlay/next.js";
+import { Popover } from "@swc-react/popover/next.js";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
-export const CreateButtonMain = () => {
+export const CreateButtonMainWC = () => {
+  const [isReady, setReady] = useState(false);
+  const { setSidenavStatus } = useMainStore((s) => s);
+  const router = useRouter();
+  // Dirty trick, the overlay is not ready until the button is render
+  useEffect(() => {
+    setReady(true);
+  }, []);
   return (
-    <MenuTrigger>
-      <Button variant="accent">
-        <Add />
-        <Text>Create</Text>
+    <>
+      <Button id="createmanbtn">
+        <IconAdd slot="icon" />
+        Create
       </Button>
-      <Menu minWidth={200}>
-        <Section>
-          <Item key="content" href="/content/new">
-            <FileSingleWebPage />
-            <Text>Write a post</Text>
-          </Item>
-          <Item key="collection">
-            <Breakdown />
-            <Text>Start a collection</Text>
-          </Item>
-          <Item key="category">
-            <Box />
-            <Text>Create a category</Text>
-          </Item>
-        </Section>
-        <Section>
-          <Item key="image">
-            <IconImage />
-            <Text>Upload an image</Text>
-          </Item>
-          <Item key="code">
-            <Code />
-            <Text>Write a code snippet</Text>
-          </Item>
-        </Section>
-      </Menu>
-    </MenuTrigger>
+      {isReady ? (
+        <Overlay trigger="createmanbtn@click" placement="bottom">
+          <Popover style={{ minWidth: 200 }}>
+            <MenuWC>
+              <MenuGroup>
+                <MenuItem
+                  onClick={() => {
+                    router.push("/content/new");
+                    setSidenavStatus(false);
+                  }}
+                >
+                  <IconFileSingleWebPage slot="icon" />
+                  Write a post
+                </MenuItem>
+                <MenuItem>
+                  <IconBreakdown slot="icon" />
+                  Start a collection
+                </MenuItem>
+                <MenuItem>
+                  <IconBox slot="icon" />
+                  Create a category
+                </MenuItem>
+              </MenuGroup>
+              <MenuDivider />
+              <MenuGroup>
+                <MenuItem>
+                  <IconImage slot="icon" />
+                  Upload an image
+                </MenuItem>
+                <MenuItem>
+                  <IconCode slot="icon" />
+                  Write a code snippet
+                </MenuItem>
+              </MenuGroup>
+            </MenuWC>
+          </Popover>
+        </Overlay>
+      ) : (
+        <></>
+      )}
+    </>
   );
 };
