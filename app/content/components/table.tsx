@@ -51,9 +51,11 @@ export interface ITableContentProps {
     | "idle"
     | "filtering";
   height: string;
+  items: IContent[]
 }
 
 export const TableContent = ({
+  items,
   selectedRowIds,
   onSelectionChange,
   rref,
@@ -96,7 +98,7 @@ export const TableContent = ({
           )}
         </TableHeader>
         <TableBody
-          items={Object.values(contentStorage)}
+          items={items}
           loadingState={isRowLoading}
           onLoadMore={onRowLoadMore}
         >

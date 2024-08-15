@@ -1,17 +1,11 @@
-import { useMainStore } from "@/stores/providers/main-store";
+import { fetcher } from "../utils/swc";
 import { ICategory } from "@/stores/slices/content";
-import { useEffect } from "react";
+import useSWR from "swr";
 
 export const useCategories = () => {
-  const { appendCategorioes, categoryStorage } = useMainStore((state) => state);
-  useEffect(() => {
-    async function fetchCate() {
-      if (!Object.keys(categoryStorage).length) {
-        const categories = await fetch("/api/category");
-        const results = await categories.json();
-        appendCategorioes((results as any).results as ICategory[]);
-      }
-    }
-    fetchCate();
-  }, [appendCategorioes, categoryStorage]);
+  const { data, isLoading } = useSWR<ICategory[]>(
+    "/api/category",
+    (...args: any) => fetcher(args).then((r) => r.results),
+  );
+  return { data, isLoading };
 };

@@ -1,10 +1,10 @@
 "use client";
 
 import { useCategories } from "../hooks/use-category";
-import { useContent } from "../hooks/use-content";
+import { useInfContents } from "../hooks/use-content";
 import { usePageMeta } from "../hooks/use-page-meta";
 import { useTrackingScroll } from "../hooks/use-scroll-position";
-import { CategoryCell, IColumnContent, TableContent } from "./components/table";
+import { IColumnContent, TableContent } from "./components/table";
 import { PreviewButton, PreviewPannel } from "./components/table-row-preview";
 import { TableContentToolbar } from "./components/table-toolbar";
 import "./page.css";
@@ -32,18 +32,23 @@ export default function ContentListPage() {
     setSelectedRowIds,
     clearSelectedRowIds,
     clearRowPreview,
+    rowIdForPreview,
   } = useMainStore((state) => state);
 
-  useCategories();
   usePageMeta({ title: "Published content" });
   useTrackingScroll(tableRef);
-  const tableIndicator = useContent();
+
+  const contents = useInfContents();
+  const { data: categories, isLoading: isCateLoading } = useCategories();
 
   useEffect(() => {
     return () => {
       clearRowPreview();
     };
   }, [clearRowPreview]);
+
+  if (contents.isLoading || isCateLoading || !categories || !contents.data)
+    return <>Loading...</>;
 
   const columns: IColumnContent[] = [
     {
@@ -58,7 +63,10 @@ export default function ContentListPage() {
       key: "title",
       name: "Title",
       width: 300,
-      render: (_, item: IContent) => (
+      render: (
+        _,
+        item: IContent, // Add prefetch
+      ) => (
         <TooltipTrigger delay={1000} crossOffset={50} placement="bottom start">
           <Link
             href={`/content/${item.id}`}
@@ -96,7 +104,12 @@ export default function ContentListPage() {
       key: "categoryId",
       name: "Category",
       minWidth: 150,
-      render: (_, item: IContent) => <CategoryCell item={item} />,
+      render: (_, item: IContent) => {
+        if (isCateLoading) return <>Loading</>;
+        return (
+          <>{categories.filter((c) => c.id === item.categoryId)[0].name}</>
+        );
+      },
     },
     {
       key: "modified",
@@ -141,18 +154,27 @@ export default function ContentListPage() {
         </Flex>
         <div ref={tableRef}>
           <TableContent
+            items={contents.data.flatMap((c) => c)}
             columns={columns}
             height="calc(100vh - 140px)"
-            isRowLoading={tableIndicator.loadingState}
+            isRowLoading={contents.isLoading ? "loadingMore" : "idle"}
             onClearSelection={clearSelectedRowIds}
-            onRowLoadMore={tableIndicator.loadMore}
+            onRowLoadMore={contents.loadMore}
             onSelectionChange={setSelectedRowIds}
             selectedRowIds={selectedRowIds}
           />
         </div>
       </Flex>
       <Flex minWidth={300} width={400} flexGrow={1}>
-        <PreviewPannel />
+        <PreviewPannel
+          content={
+            rowIdForPreview
+              ? contents.data
+                  .flatMap((c) => c)
+                  .filter((c) => c.id === rowIdForPreview)[0]
+              : null
+          }
+        />
       </Flex>
     </Flex>
   );

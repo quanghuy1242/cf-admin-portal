@@ -1,6 +1,11 @@
 "use client";
 
 import { useCategories } from "@/app/hooks/use-category";
+import {
+  useContent,
+  useContentUpdate,
+  useInfContentsUpdate,
+} from "@/app/hooks/use-content";
 import { usePageMeta } from "@/app/hooks/use-page-meta";
 import { Editor } from "@/editor/editor";
 import { useMainStore } from "@/stores/providers/main-store";
@@ -27,39 +32,34 @@ export default function ContentDetailPage({
 }) {
   const {
     setActiveContentId,
-    contentStorage,
-    appendContents,
-    categoryStorage,
     activeContentDrafting,
     setPartiallyDraftingContent,
+    clearDraftedContent,
   } = useMainStore((s) => s);
 
   const [isEditorReady, setEditorReady] = useState(false);
   const [isButtonLoading, setIsButtonLoading] = useState(false);
+  const [newTag, setNewTag] = useState("");
+  const [draftedTagDirty, setDaftedTagDirty] = useState(false);
+
   const editor = useRef<LexicalEditor>(null);
+
   usePageMeta({ title: `Editing post with ID ${params.id}` });
-  useCategories();
   setActiveContentId(params.id);
 
-  useEffect(() => {
-    if (contentStorage[params.id]) {
-      setPartiallyDraftingContent(contentStorage[params.id]);
-    }
-  }, [contentStorage, params.id, setPartiallyDraftingContent]);
+  const { data: categories, isLoading: isCateLoading } = useCategories();
+  const { data: content, isLoading: isContentLoading } = useContent(params.id);
+  const updateContent = useContentUpdate(params.id);
+  const updateInfContent = useInfContentsUpdate();
 
-  // On direct payload, need to fetch data instead
   useEffect(() => {
-    async function fetchData() {
-      const content = await fetch("/api/content/" + params.id);
-      appendContents([await content.json()]);
+    if (editor.current) {
       setEditorReady(true);
     }
-    if (!contentStorage[params.id]) {
-      fetchData();
-    } else {
-      setEditorReady(true);
-    }
-  }, [appendContents, contentStorage, params.id]);
+  }, [isContentLoading]);
+
+  if (isCateLoading || isContentLoading || !categories || !content)
+    return <>Loading...</>;
 
   return (
     <Flex>
@@ -67,10 +67,8 @@ export default function ContentDetailPage({
         ready={isEditorReady}
         rref={editor}
         editorState={
-          contentStorage[params.id]
-            ? JSON.stringify(
-                JSON.parse(contentStorage[params.id].content).editorState,
-              )
+          content
+            ? JSON.stringify(JSON.parse(content.content).editorState)
             : null
         }
       />
@@ -97,7 +95,7 @@ export default function ContentDetailPage({
                       label="Title"
                       isRequired
                       necessityIndicator="icon"
-                      value={activeContentDrafting.title}
+                      value={activeContentDrafting.title || content.title}
                       onChange={(title) =>
                         setPartiallyDraftingContent({ title })
                       }
@@ -107,14 +105,16 @@ export default function ContentDetailPage({
                       label="Slug"
                       isRequired
                       necessityIndicator="icon"
-                      value={activeContentDrafting.slug}
+                      value={activeContentDrafting.slug || content.slug}
                       onChange={(slug) => setPartiallyDraftingContent({ slug })}
                     />
                     <Picker
                       width="100%"
-                      selectedKey={activeContentDrafting?.categoryId}
+                      selectedKey={
+                        activeContentDrafting.categoryId || content.categoryId
+                      }
                       label="Category"
-                      items={Object.values(categoryStorage)}
+                      items={categories}
                       onSelectionChange={(categoryId: any) =>
                         setPartiallyDraftingContent({ categoryId })
                       }
@@ -122,18 +122,56 @@ export default function ContentDetailPage({
                       {(item) => <Item key={item.id}>{item.name}</Item>}
                     </Picker>
                     <Image
-                      src={activeContentDrafting?.coverImage || ""}
+                      src={
+                        activeContentDrafting.coverImage || content.coverImage
+                      }
                       alt=""
                     />
                     <Flex direction="column">
-                      <TextField width="100%" label="Tags" />
+                      <TextField
+                        value={newTag}
+                        width="100%"
+                        label="Tags"
+                        onChange={setNewTag}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            const existing = !draftedTagDirty
+                              ? content.tags
+                              : activeContentDrafting.tags;
+                            setPartiallyDraftingContent({
+                              tags: Array.from(
+                                new Set([...(existing || []), newTag]),
+                              ),
+                            });
+                            setDaftedTagDirty(true);
+                            setNewTag("");
+                          }
+                        }}
+                      />
                       <TagGroup
-                        onRemove={(keys) => console.log(keys)}
+                        onRemove={(keys) => {
+                          const existing = !draftedTagDirty
+                            ? content.tags
+                            : activeContentDrafting.tags;
+                          if (existing) {
+                            setPartiallyDraftingContent({
+                              tags: Array.from(existing).filter(
+                                (t) => !keys.has(t),
+                              ),
+                            });
+                            setDaftedTagDirty(true);
+                          }
+                        }}
                         items={
-                          (activeContentDrafting?.tags || [])
+                          (
+                            (!draftedTagDirty
+                              ? content.tags
+                              : activeContentDrafting.tags) || []
+                          )
                             .filter((t) => t !== "")
                             .map((t, i) => ({
-                              id: i,
+                              id: t,
                               name: t,
                             })) || []
                         }
@@ -153,26 +191,23 @@ export default function ContentDetailPage({
               variant="accent"
               isDisabled={isButtonLoading}
               onPress={() => {
-                editor.current?.getEditorState().read(() => {
+                editor.current?.getEditorState().read(async () => {
                   if (editor.current) {
                     setIsButtonLoading(true);
-                    fetch("/api/content/" + params.id, {
-                      method: "PATCH",
-                      body: JSON.stringify({
+                    try {
+                      const d = await updateContent({
+                        ...activeContentDrafting,
                         content: JSON.stringify(editor.current.toJSON()),
-                        title: activeContentDrafting.title,
-                        slug: activeContentDrafting.slug,
-                      }),
-                    })
-                      .then((res) => {
-                        fetch("/api/content/" + params.id).then((r) =>
-                          r.json().then((j) => {
-                            appendContents([j as any]);
-                            setIsButtonLoading(false);
-                          }),
-                        );
-                      })
-                      .catch((err) => alert(err));
+                      });
+                      updateInfContent([d]);
+                      clearDraftedContent();
+                      setDaftedTagDirty(false);
+                    } catch (error) {
+                      alert("Something went wrong!");
+                    } finally {
+                      setIsButtonLoading(false);
+                      alert("Saved!");
+                    }
                   }
                 });
               }}

@@ -4,8 +4,7 @@ import { createHeadlessEditor } from "@lexical/headless";
 import { $generateHtmlFromNodes } from "@lexical/html";
 import { useEffect, useMemo, useState } from "react";
 
-export const useLexicalHTML = () => {
-  const { rowIdForPreview, contentStorage } = useMainStore((state) => state);
+export const useLexicalHTML = (str?: string | null) => {
   const [previewHTML, setPreviewHTML] = useState("");
   const editor = useMemo(
     () =>
@@ -18,10 +17,8 @@ export const useLexicalHTML = () => {
     [],
   );
   useEffect(() => {
-    if (rowIdForPreview) {
-      const body = JSON.stringify(
-        JSON.parse(contentStorage[rowIdForPreview].content).editorState,
-      );
+    if (str) {
+      const body = JSON.stringify(JSON.parse(str).editorState);
       editor.setEditorState(editor.parseEditorState(body));
       editor.update(() => {
         const html = $generateHtmlFromNodes(editor);
@@ -30,6 +27,6 @@ export const useLexicalHTML = () => {
     } else {
       setPreviewHTML("");
     }
-  }, [contentStorage, editor, rowIdForPreview]);
+  }, [editor, str]);
   return previewHTML;
 };

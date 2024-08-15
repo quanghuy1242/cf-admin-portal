@@ -40,10 +40,9 @@ export const PreviewButton = ({ item }: { item: IContent }) => {
   );
 };
 
-export const PreviewPannel = () => {
-  const { rowIdForPreview, contentStorage } = useMainStore((state) => state);
-  const previewHTML = useLexicalHTML();
-  if (!rowIdForPreview) {
+export const PreviewPannel = ({ content }: { content: IContent | null }) => {
+  const previewHTML = useLexicalHTML(content?.content);
+  if (!content) {
     return (
       <Flex direction="column" width="100%">
         <IllustratedMessage>
@@ -70,12 +69,9 @@ export const PreviewPannel = () => {
             }}
           >
             <Heading level={2} UNSAFE_className="text-2xl mb-2">
-              {contentStorage[rowIdForPreview].title}
+              {content?.title || ""}
             </Heading>
-            <Image
-              src={contentStorage[rowIdForPreview].coverImage}
-              alt="ALTT"
-            />
+            <Image src={content?.coverImage} alt="ALTT" />
             <div dangerouslySetInnerHTML={{ __html: previewHTML }}></div>
           </div>
         </Item>
@@ -87,20 +83,13 @@ export const PreviewPannel = () => {
             }}
           >
             <Flex direction="column" gap={10} marginY={10}>
-              <LabeledValue
-                label="Title"
-                value={contentStorage[rowIdForPreview].title}
-              />
-              <Image
-                src={contentStorage[rowIdForPreview].coverImage}
-                alt="ALT"
-              />
-              {contentStorage[rowIdForPreview].tags.length === 0 ||
-              contentStorage[rowIdForPreview].tags[0] === "" ? (
+              <LabeledValue label="Title" value={content?.title} />
+              <Image src={content?.coverImage} alt="ALT" />
+              {content?.tags.length === 0 || content?.tags[0] === "" ? (
                 <></>
               ) : (
                 <TagGroup
-                  items={contentStorage[rowIdForPreview].tags.map((t, i) => ({
+                  items={content.tags.map((t, i) => ({
                     i,
                     t,
                   }))}
@@ -112,15 +101,11 @@ export const PreviewPannel = () => {
               )}
               <LabeledValue
                 label="Modified"
-                value={new Date(
-                  contentStorage[rowIdForPreview].modified,
-                ).toLocaleString()}
+                value={new Date(content.modified).toLocaleString()}
               />
               <LabeledValue
                 label="Created"
-                value={new Date(
-                  contentStorage[rowIdForPreview].created,
-                ).toLocaleString()}
+                value={new Date(content.created).toLocaleString()}
               />
             </Flex>
           </div>

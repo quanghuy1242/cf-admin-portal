@@ -47,6 +47,7 @@ export type ContentAction = {
   clearRowPreview: () => void;
   setActiveContentId: (id: string | null) => void;
   setPartiallyDraftingContent: (content: Partial<IContent>) => void;
+  clearDraftedContent: () => void;
 };
 
 export type ContentSlice = ContentState & ContentAction;
@@ -135,6 +136,10 @@ export const createContentSlice: (
             state.activeContentDrafting[t] = v;
           }
         }
+      }),
+    clearDraftedContent: () =>
+      set((state) => {
+        state.activeContentDrafting = defaultInitState.activeContentDrafting;
       }),
   });
 };
