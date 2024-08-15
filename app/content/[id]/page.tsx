@@ -30,13 +30,22 @@ export default function ContentDetailPage({
     contentStorage,
     appendContents,
     categoryStorage,
+    activeContentDrafting,
+    setPartiallyDraftingContent,
   } = useMainStore((s) => s);
 
   const [isEditorReady, setEditorReady] = useState(false);
+  const [isButtonLoading, setIsButtonLoading] = useState(false);
   const editor = useRef<LexicalEditor>(null);
   usePageMeta({ title: `Editing post with ID ${params.id}` });
   useCategories();
   setActiveContentId(params.id);
+
+  useEffect(() => {
+    if (contentStorage[params.id]) {
+      setPartiallyDraftingContent(contentStorage[params.id]);
+    }
+  }, [contentStorage, params.id, setPartiallyDraftingContent]);
 
   // On direct payload, need to fetch data instead
   useEffect(() => {
@@ -88,30 +97,40 @@ export default function ContentDetailPage({
                       label="Title"
                       isRequired
                       necessityIndicator="icon"
-                      value={contentStorage[params.id]?.title}
+                      value={activeContentDrafting.title}
+                      onChange={(title) =>
+                        setPartiallyDraftingContent({ title })
+                      }
                     />
                     <TextField
                       width="100%"
                       label="Slug"
                       isRequired
                       necessityIndicator="icon"
-                      value={contentStorage[params.id]?.slug}
+                      value={activeContentDrafting.slug}
+                      onChange={(slug) => setPartiallyDraftingContent({ slug })}
                     />
                     <Picker
                       width="100%"
-                      selectedKey={contentStorage[params.id]?.categoryId}
+                      selectedKey={activeContentDrafting?.categoryId}
                       label="Category"
                       items={Object.values(categoryStorage)}
+                      onSelectionChange={(categoryId: any) =>
+                        setPartiallyDraftingContent({ categoryId })
+                      }
                     >
                       {(item) => <Item key={item.id}>{item.name}</Item>}
                     </Picker>
-                    <Image src={contentStorage[params.id]?.coverImage} alt="" />
+                    <Image
+                      src={activeContentDrafting?.coverImage || ""}
+                      alt=""
+                    />
                     <Flex direction="column">
                       <TextField width="100%" label="Tags" />
                       <TagGroup
                         onRemove={(keys) => console.log(keys)}
                         items={
-                          contentStorage[params.id]?.tags
+                          (activeContentDrafting?.tags || [])
                             .filter((t) => t !== "")
                             .map((t, i) => ({
                               id: i,
@@ -132,8 +151,30 @@ export default function ContentDetailPage({
             <View flexGrow={1}></View>
             <Button
               variant="accent"
+              isDisabled={isButtonLoading}
               onPress={() => {
-                alert(JSON.stringify(editor.current?.toJSON() || {}));
+                editor.current?.getEditorState().read(() => {
+                  if (editor.current) {
+                    setIsButtonLoading(true);
+                    fetch("/api/content/" + params.id, {
+                      method: "PATCH",
+                      body: JSON.stringify({
+                        content: JSON.stringify(editor.current.toJSON()),
+                        title: activeContentDrafting.title,
+                        slug: activeContentDrafting.slug,
+                      }),
+                    })
+                      .then((res) => {
+                        fetch("/api/content/" + params.id).then((r) =>
+                          r.json().then((j) => {
+                            appendContents([j as any]);
+                            setIsButtonLoading(false);
+                          }),
+                        );
+                      })
+                      .catch((err) => alert(err));
+                  }
+                });
               }}
             >
               Save

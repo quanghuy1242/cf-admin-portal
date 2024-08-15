@@ -24,7 +24,7 @@ const lexicalNodes: Array<Klass<LexicalNode>> = [
   LinkNode,
   OverflowNode,
   MarkNode,
-  HorizontalRuleNode
+  HorizontalRuleNode,
 ];
 
 export default lexicalNodes;

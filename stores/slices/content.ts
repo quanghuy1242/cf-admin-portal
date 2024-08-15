@@ -9,6 +9,7 @@ export type ContentState = {
   contentScrollPosition: number;
   rowIdForPreview?: string | null;
   activeContentId: string | null;
+  activeContentDrafting: Partial<IContent>;
 };
 
 export interface IContent {
@@ -45,6 +46,7 @@ export type ContentAction = {
   setRowIdForPreview: (rowId: string) => void;
   clearRowPreview: () => void;
   setActiveContentId: (id: string | null) => void;
+  setPartiallyDraftingContent: (content: Partial<IContent>) => void;
 };
 
 export type ContentSlice = ContentState & ContentAction;
@@ -56,6 +58,7 @@ export const defaultInitState: ContentState = {
   contentCursor: "/api/content",
   contentScrollPosition: 0,
   activeContentId: null,
+  activeContentDrafting: {},
 };
 
 export const createContentSlice: (
@@ -122,6 +125,16 @@ export const createContentSlice: (
     setActiveContentId: (id: string | null) =>
       set((state) => {
         state.activeContentId = id;
+      }),
+    setPartiallyDraftingContent: (content: Partial<IContent>) =>
+      set((state) => {
+        let t: keyof IContent;
+        for (t in content) {
+          const v: any = content[t];
+          if (v) {
+            state.activeContentDrafting[t] = v;
+          }
+        }
       }),
   });
 };

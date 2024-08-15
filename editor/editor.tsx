@@ -1,4 +1,6 @@
 import lexicalNodes from "./nodes";
+import { LexicalAutoLinkPlugin } from "./plugins/auto-link-plugin";
+import { LinkPlugin } from "./plugins/link-plugin";
 import { RestoreInputPlugin } from "./plugins/restore-editor-state-plugin";
 import { editorTheme } from "./theme";
 import { ToolbarEditor } from "./toolbar";
@@ -42,7 +44,7 @@ export const Editor = ({
   };
 
   return (
-    <LexicalComposer initialConfig={initialConfig}>
+    <LexicalComposer initialConfig={initialConfig} key={"fjkasfasfjka;sjf;asfj;"}>
       <div className="rounded-sm rounded-tl-xl flex-grow">
         <ToolbarEditor ready={ready} />
         <div className="bg-white relative overflow-auto h-[calc(100vh-110px)]">
@@ -62,6 +64,8 @@ export const Editor = ({
           />
           <EditorRefPlugin editorRef={rref} />
           <RestoreInputPlugin editorState={editorState} />
+          <LexicalAutoLinkPlugin />
+          <LinkPlugin />
           <HistoryPlugin />
           <AutoFocusPlugin />
           <ListPlugin />
@@ -69,7 +73,7 @@ export const Editor = ({
           <HorizontalRulePlugin />
           <HashtagPlugin />
           <TablePlugin hasCellMerge={true} hasCellBackgroundColor={true} />
-          <ClickableLinkPlugin />
+          <ClickableLinkPlugin disabled={true} />
           <TabIndentationPlugin />
         </div>
       </div>
