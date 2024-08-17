@@ -15,12 +15,17 @@ import Rail from "@spectrum-icons/workflow/Rail";
 import { TopNav, TopNavItem } from "@swc-react/top-nav/next.js";
 
 const TopNavActual = () => {
-  const { collapsedSidenav, setSidenavStatus, isOpenedSidenav } = useMainStore((s) => s);
+  const { collapsedSidenav, setSidenavStatus, isOpenedSidenav, pageMeta } =
+    useMainStore((s) => s);
   const { user } = useUser();
   return (
     <TopNav shouldAnimate>
       {collapsedSidenav ? (
-        <ActionButton isQuiet id="sidenavtrigger" onPress={() => setSidenavStatus(!isOpenedSidenav)}>
+        <ActionButton
+          isQuiet
+          id="sidenavtrigger"
+          onPress={() => setSidenavStatus(!isOpenedSidenav)}
+        >
           <Rail />
         </ActionButton>
       ) : (
@@ -28,7 +33,9 @@ const TopNavActual = () => {
       )}
       <TopNavItem style={{ fontWeight: "bold" }}>Admin Portal</TopNavItem>
       <TopNavItem style={{ marginInline: "auto" }}>
-        <Text UNSAFE_style={{ fontSize: "1.1em" }}>Content List</Text>
+        <Text UNSAFE_style={{ fontSize: "1.1em" }}>
+          {pageMeta.title || "..."}
+        </Text>
       </TopNavItem>
       <MenuTrigger>
         <ActionButton isQuiet justifySelf={"right"}>

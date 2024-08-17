@@ -21,7 +21,7 @@ export async function GET(
       },
     },
   );
-  if (response.status !== 200) {
+  if (content.status !== 200) {
     return Response.json(
       {
         message: "There something wrong",
@@ -57,7 +57,7 @@ export async function PATCH(
       body: JSON.stringify(await request.json()),
     },
   );
-  if (response.status !== 200) {
+  if (content.status !== 200) {
     return Response.json(
       {
         message: "There something wrong",

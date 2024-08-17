@@ -26,6 +26,9 @@ export const updateContent = async (id: string, data: IContentUpdate) => {
     method: "PATCH",
     body: JSON.stringify(data),
   });
+  if (response.status !== 200) {
+    throw await response.json();
+  }
   return (await response.json()) as IContent;
 };
 

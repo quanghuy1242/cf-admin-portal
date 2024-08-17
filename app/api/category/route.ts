@@ -25,7 +25,7 @@ export const GET = async (request: NextRequest) => {
     },
   );
 
-  if (response.status !== 200) {
+  if (categories.status !== 200) {
     return Response.json(
       {
         message: "There something wrong",

@@ -7,9 +7,13 @@ import { Editor } from "@/editor/editor";
 import { useMainStore } from "@/stores/providers/main-store";
 import {
   Button,
+  Content,
   Flex,
+  Heading,
   Image,
+  InlineAlert,
   Item,
+  LabeledValue,
   Picker,
   TabList,
   TabPanels,
@@ -18,7 +22,7 @@ import {
   TextField,
   View,
 } from "@adobe/react-spectrum";
-import { useQueryClient } from "@tanstack/react-query";
+import { ToastQueue } from "@react-spectrum/toast";
 import { LexicalEditor } from "lexical";
 import { useRef, useState } from "react";
 
@@ -33,21 +37,21 @@ export default function ContentDetailPage({
     setPartiallyDraftingContent,
     clearDraftedContent,
   } = useMainStore((s) => s);
-  const queryClient = useQueryClient();
 
   const [isEditorReady, setEditorReady] = useState(true);
   const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [newTag, setNewTag] = useState("");
   const [draftedTagDirty, setDaftedTagDirty] = useState(false);
+  const [errors, setErrors] = useState([]);
 
   const editor = useRef<LexicalEditor>(null);
 
-  usePageMeta({ title: `Editing post with ID ${params.id}` });
   setActiveContentId(params.id);
 
   const { data: categories } = useCategories();
   const { data: content } = useContent(params.id);
   const { mutate: mutateContent } = useContentUpdate();
+  usePageMeta({ title: `[Editing] ${content?.title || "Loading"}` });
 
   if (!categories || !content) return <>Loading...</>;
 
@@ -76,9 +80,27 @@ export default function ContentDetailPage({
               <TabPanels>
                 <Item>
                   <Flex direction="column" gap={10}>
+                    {!Object.keys(errors).length ? (
+                      <></>
+                    ) : (
+                      <InlineAlert variant="negative" margin={10}>
+                        <Heading>Validation Errors</Heading>
+                        <Content>
+                          {errors.map((e: any) => (
+                            <LabeledValue
+                              key={(e.path as string[]).join(":")}
+                              label={`Field name: ${(e.path as string[]).join(" > ")}`}
+                              value={`${e.message}: ${e.code}`}
+                            />
+                          ))}
+                        </Content>
+                      </InlineAlert>
+                    )}
+
                     <TextField
                       width="100%"
                       label="Title"
+                      name="title"
                       isRequired
                       necessityIndicator="icon"
                       value={activeContentDrafting.title || content.title}
@@ -89,6 +111,7 @@ export default function ContentDetailPage({
                     <TextField
                       width="100%"
                       label="Slug"
+                      name="slug"
                       isRequired
                       necessityIndicator="icon"
                       value={activeContentDrafting.slug || content.slug}
@@ -96,6 +119,7 @@ export default function ContentDetailPage({
                     />
                     <Picker
                       width="100%"
+                      name="categoryId"
                       selectedKey={
                         activeContentDrafting.categoryId || content.categoryId
                       }
@@ -116,6 +140,7 @@ export default function ContentDetailPage({
                     <Flex direction="column">
                       <TextField
                         value={newTag}
+                        name="newTag"
                         width="100%"
                         label="Tags"
                         onChange={setNewTag}
@@ -181,20 +206,6 @@ export default function ContentDetailPage({
                   if (editor.current) {
                     setIsButtonLoading(true);
                     try {
-                      // const d = await updateContent(
-                      //   `/api/content/${content.id}`,
-                      //   {
-                      //     arg: {
-                      //       ...activeContentDrafting,
-                      //       content: JSON.stringify(editor.current.toJSON()),
-                      //     },
-                      //   },
-                      // );
-                      // mutateInfContent();
-                      // mutateContent(d, {
-                      //   populateCache: (n, t) => n,
-                      //   revalidate: false,
-                      // });
                       await mutateContent({
                         id: params.id,
                         content: {
@@ -202,15 +213,20 @@ export default function ContentDetailPage({
                           content: JSON.stringify(editor.current.toJSON()),
                         },
                       });
-                      // m()
                       clearDraftedContent();
                       setDaftedTagDirty(false);
+                      setErrors([]);
+                      ToastQueue.positive("Saved Successfully!", {
+                        timeout: 5000,
+                      });
                     } catch (error) {
-                      console.log(error);
-                      alert("Something went wrong!");
+                      setErrors((error as any).error.error.issues);
+                      ToastQueue.negative(
+                        "Error happened when saving the draft!",
+                        { timeout: 5000 },
+                      );
                     } finally {
                       setIsButtonLoading(false);
-                      alert("Saved!");
                     }
                   }
                 });

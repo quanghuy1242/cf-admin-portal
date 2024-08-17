@@ -13,6 +13,7 @@ import {
   View,
 } from "@adobe/react-spectrum";
 import { UserProvider, useUser } from "@auth0/nextjs-auth0/client";
+import { ToastContainer } from "@react-spectrum/toast";
 import RailRightClose from "@spectrum-icons/workflow/RailRightClose";
 import RailRightOpen from "@spectrum-icons/workflow/RailRightOpen";
 import { Overlay } from "@swc-react/overlay/next.js";
@@ -97,6 +98,7 @@ const ProtectedLayout = ({ children }: PropsWithChildren) => {
       }}
     >
       <Provider theme={defaultTheme} router={{ navigate: router.push }}>
+        <ToastContainer />
         <Flex direction="column" gap={10}>
           <View padding={10} paddingTop={0}>
             <TopNavWrapped />
