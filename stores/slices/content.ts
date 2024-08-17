@@ -1,10 +1,9 @@
 import { ImmerStateCreator } from "../type-helpers";
+import { IContent } from "@/types/content";
 import { type Selection } from "@adobe/react-spectrum";
 
 export type ContentState = {
   selectedRowIds: Selection;
-  contentStorage: { [key: string]: IContent };
-  categoryStorage: { [key: string]: ICategory };
   contentCursor: string;
   contentScrollPosition: number;
   rowIdForPreview?: string | null;
@@ -12,35 +11,9 @@ export type ContentState = {
   activeContentDrafting: Partial<IContent>;
 };
 
-export interface IContent {
-  id: string;
-  categoryId: string;
-  content: string;
-  coverImage: string;
-  created: string;
-  metadata: { [key: string]: string };
-  modified: string;
-  slug: string;
-  status: string;
-  tags: string[];
-  title: string;
-  userId: string;
-}
-
-export interface ICategory {
-  id: string;
-  name: string;
-  description: string;
-  status: string;
-  modified: string;
-  created: string;
-}
-
 export type ContentAction = {
   setSelectedRowIds: (rowId: Selection) => void;
   clearSelectedRowIds: () => void;
-  appendContents: (contents: IContent[]) => void;
-  appendCategorioes: (categories: ICategory[]) => void;
   setContentCursor: (cursor: string) => void;
   setContentScrollPosition: (p: number) => void;
   setRowIdForPreview: (rowId: string) => void;
@@ -54,8 +27,6 @@ export type ContentSlice = ContentState & ContentAction;
 
 export const defaultInitState: ContentState = {
   selectedRowIds: new Set<string>(),
-  contentStorage: {},
-  categoryStorage: {},
   contentCursor: "/api/content",
   contentScrollPosition: 0,
   activeContentId: null,
@@ -76,36 +47,6 @@ export const createContentSlice: (
     clearSelectedRowIds: () =>
       set((state) => {
         state.selectedRowIds = defaultInitState.selectedRowIds;
-      }),
-    appendContents: (contents: IContent[]) =>
-      set((state) => {
-        contents.forEach((c) => {
-          state.contentStorage[c.id] = c;
-        });
-        // TODO fix this ugly sort
-        state.contentStorage = Object.fromEntries(
-          Object.entries(state.contentStorage).sort((a, b) => {
-            return (
-              new Date(b[1].modified).getTime() -
-              new Date(a[1].modified).getTime()
-            );
-          }),
-        );
-      }),
-    appendCategorioes: (categories: ICategory[]) =>
-      set((state) => {
-        categories.forEach((c) => {
-          state.categoryStorage[c.id] = c;
-        });
-        // TODO fix this ugly sort
-        state.categoryStorage = Object.fromEntries(
-          Object.entries(state.categoryStorage).sort((a, b) => {
-            return (
-              new Date(b[1].modified).getTime() -
-              new Date(a[1].modified).getTime()
-            );
-          }),
-        );
       }),
     setContentCursor: (cursor: string) =>
       set((state) => {

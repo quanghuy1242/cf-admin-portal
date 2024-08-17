@@ -1,7 +1,6 @@
 import { getSession } from "@auth0/nextjs-auth0/edge";
 import { getRequestContext } from "@cloudflare/next-on-pages";
 import { NextRequest, NextResponse } from "next/server";
-import { env } from "process";
 
 export async function GET(
   request: NextRequest,
@@ -15,7 +14,7 @@ export async function GET(
   }
   const { accessToken } = session;
   const content = await getRequestContext().env.CONTENT.fetch(
-    env.CONTENT_API + "/api/v1/contents/" + params.id,
+    process.env.CONTENT_API + "/api/v1/contents/" + params.id,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -48,7 +47,7 @@ export async function PATCH(
   }
   const { accessToken } = session;
   const content = await getRequestContext().env.CONTENT.fetch(
-    env.CONTENT_API + "/api/v1/contents/" + params.id,
+    process.env.CONTENT_API + "/api/v1/contents/" + params.id,
     {
       method: "PATCH",
       headers: {

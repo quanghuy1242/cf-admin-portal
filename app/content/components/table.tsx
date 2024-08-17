@@ -1,7 +1,6 @@
 "use client";
 
-import { useMainStore } from "@/stores/providers/main-store";
-import { IContent } from "@/stores/slices/content";
+import { IContent } from "@/types/content";
 import {
   ActionBar,
   ActionBarContainer,
@@ -43,7 +42,7 @@ export interface ITableContentProps {
   columns: IColumnContent[];
   onClearSelection: () => void;
   onRowLoadMore: () => any;
-  isRowLoading:
+  isRowLoading?:
     | "loading"
     | "sorting"
     | "loadingMore"
@@ -51,7 +50,7 @@ export interface ITableContentProps {
     | "idle"
     | "filtering";
   height: string;
-  items: IContent[]
+  items: IContent[];
 }
 
 export const TableContent = ({
@@ -65,7 +64,6 @@ export const TableContent = ({
   isRowLoading,
   height,
 }: ITableContentProps) => {
-  const { contentStorage } = useMainStore((s) => s);
   const defaultCellRender: IColumnContent["render"] = (
     key: Key,
     item: IContent,
@@ -99,7 +97,7 @@ export const TableContent = ({
         </TableHeader>
         <TableBody
           items={items}
-          loadingState={isRowLoading}
+          // loadingState={isRowLoading}
           onLoadMore={onRowLoadMore}
         >
           {(item) => (
@@ -128,9 +126,4 @@ export const TableContent = ({
       </ActionBar>
     </ActionBarContainer>
   );
-};
-
-export const CategoryCell = ({ item }: { item: IContent }) => {
-  const { categoryStorage } = useMainStore((state) => state);
-  return <>{categoryStorage[item.categoryId]?.name || ""}</>;
 };

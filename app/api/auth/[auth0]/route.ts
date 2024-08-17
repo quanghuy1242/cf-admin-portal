@@ -1,10 +1,9 @@
 import { handleAuth, handleLogin, handleLogout } from "@auth0/nextjs-auth0/edge";
-import { env } from "process";
 
 export const GET = handleAuth({
     login: handleLogin({
         authorizationParams: {
-            audience: env.AUTH0_AUDIENCE,
+            audience: process.env.AUTH0_AUDIENCE,
             scope: "openid profile email"
         }
     }),

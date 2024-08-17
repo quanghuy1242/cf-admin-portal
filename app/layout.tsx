@@ -18,13 +18,14 @@ import RailRightOpen from "@spectrum-icons/workflow/RailRightOpen";
 import { Overlay } from "@swc-react/overlay/next.js";
 import { Popover } from "@swc-react/popover/next.js";
 import { Theme } from "@swc-react/theme/next.js";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Inter } from "next/font/google";
 import { useRouter } from "next/navigation";
-import { PropsWithChildren, useEffect, useState } from "react";
-import { SWRConfig } from "swr";
+import { PropsWithChildren, useEffect } from "react";
 import { useShallow } from "zustand/react/shallow";
 
 const inter = Inter({ subsets: ["latin"] });
+const queryClient = new QueryClient();
 
 export default function RootLayout({
   children,
@@ -41,9 +42,11 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className + " body"}>
         <UserProvider>
-          <MainStoreProvider>
-            <ProtectedLayout>{children}</ProtectedLayout>
-          </MainStoreProvider>
+          <QueryClientProvider client={queryClient}>
+            <MainStoreProvider>
+              <ProtectedLayout>{children}</ProtectedLayout>
+            </MainStoreProvider>
+          </QueryClientProvider>
         </UserProvider>
       </body>
     </html>
@@ -85,55 +88,53 @@ const ProtectedLayout = ({ children }: PropsWithChildren) => {
     </View>
   );
   return (
-    <SWRConfig>
-      <Theme
-        theme="spectrum"
-        color="light"
-        scale="medium"
-        style={{
-          display: !user ? "none" : "block",
-        }}
-      >
-        <Provider theme={defaultTheme} router={{ navigate: router.push }}>
-          <Flex direction="column" gap={10}>
-            <View padding={10} paddingTop={0}>
-              <TopNavWrapped />
-            </View>
-            <Flex direction="row" gap={10} flexGrow={1}>
-              {collapsedSidenav ? (
-                <Overlay
-                  trigger="sidenavtrigger"
-                  placement="right"
-                  open={isOpenedSidenav}
-                >
-                  <Popover
-                    style={{
-                      position: "relative",
-                      top: 46,
-                      left: -50,
-                      height: "calc(100vh - 56px)",
-                    }}
-                  >
-                    <SideComponent marginTop={10} />
-                  </Popover>
-                </Overlay>
-              ) : (
-                <SideComponent />
-              )}
-              <View
-                width={"100%"}
-                height="calc(100vh - 70px)"
-                overflow="auto"
-                paddingX={10}
-                // paddingBottom={10}
-                backgroundColor="gray-100"
+    <Theme
+      theme="spectrum"
+      color="light"
+      scale="medium"
+      style={{
+        display: !user ? "none" : "block",
+      }}
+    >
+      <Provider theme={defaultTheme} router={{ navigate: router.push }}>
+        <Flex direction="column" gap={10}>
+          <View padding={10} paddingTop={0}>
+            <TopNavWrapped />
+          </View>
+          <Flex direction="row" gap={10} flexGrow={1}>
+            {collapsedSidenav ? (
+              <Overlay
+                trigger="sidenavtrigger"
+                placement="right"
+                open={isOpenedSidenav}
               >
-                {children}
-              </View>
-            </Flex>
+                <Popover
+                  style={{
+                    position: "relative",
+                    top: 46,
+                    left: -50,
+                    height: "calc(100vh - 56px)",
+                  }}
+                >
+                  <SideComponent marginTop={10} />
+                </Popover>
+              </Overlay>
+            ) : (
+              <SideComponent />
+            )}
+            <View
+              width={"100%"}
+              height="calc(100vh - 70px)"
+              overflow="auto"
+              paddingX={10}
+              // paddingBottom={10}
+              backgroundColor="gray-100"
+            >
+              {children}
+            </View>
           </Flex>
-        </Provider>
-      </Theme>
-    </SWRConfig>
+        </Flex>
+      </Provider>
+    </Theme>
   );
 };

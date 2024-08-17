@@ -1,6 +1,6 @@
 import { useLexicalHTML } from "@/app/hooks/use-lexical-preview";
 import { useMainStore } from "@/stores/providers/main-store";
-import { IContent } from "@/stores/slices/content";
+import { IContent } from "@/types/content";
 import {
   Content,
   Flex,

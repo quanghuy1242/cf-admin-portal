@@ -2,7 +2,6 @@ import { withPagination } from "../helpers/pagination";
 import { getSession } from "@auth0/nextjs-auth0/edge";
 import { getRequestContext } from "@cloudflare/next-on-pages";
 import { NextResponse, type NextRequest } from "next/server";
-import { env } from "process";
 
 export const GET = async (request: NextRequest) => {
   // Extract wanted page and pageSize
@@ -18,7 +17,7 @@ export const GET = async (request: NextRequest) => {
   }
   const { accessToken } = session;
   const categories = await getRequestContext().env.CONTENT.fetch(
-    env.CONTENT_API + "/api/v1/categories?" + withPagination(page, pageSize),
+    process.env.CONTENT_API + "/api/v1/categories?" + withPagination(page, pageSize),
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -37,10 +36,7 @@ export const GET = async (request: NextRequest) => {
       },
     );
   }
-  return Response.json({
-    results: await categories.json(),
-    next: null,
-  });
+  return Response.json(await categories.json());
 };
 
 export const runtime = "edge";

@@ -1,11 +1,7 @@
 "use client";
 
 import { useCategories } from "@/app/hooks/use-category";
-import {
-  useContent,
-  useContentUpdate,
-  useInfContentsUpdate,
-} from "@/app/hooks/use-content";
+import { useContentUpdate, useContent } from "@/app/hooks/use-content";
 import { usePageMeta } from "@/app/hooks/use-page-meta";
 import { Editor } from "@/editor/editor";
 import { useMainStore } from "@/stores/providers/main-store";
@@ -22,8 +18,9 @@ import {
   TextField,
   View,
 } from "@adobe/react-spectrum";
+import { useQueryClient } from "@tanstack/react-query";
 import { LexicalEditor } from "lexical";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 export default function ContentDetailPage({
   params,
@@ -36,8 +33,9 @@ export default function ContentDetailPage({
     setPartiallyDraftingContent,
     clearDraftedContent,
   } = useMainStore((s) => s);
+  const queryClient = useQueryClient();
 
-  const [isEditorReady, setEditorReady] = useState(false);
+  const [isEditorReady, setEditorReady] = useState(true);
   const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [newTag, setNewTag] = useState("");
   const [draftedTagDirty, setDaftedTagDirty] = useState(false);
@@ -47,30 +45,18 @@ export default function ContentDetailPage({
   usePageMeta({ title: `Editing post with ID ${params.id}` });
   setActiveContentId(params.id);
 
-  const { data: categories, isLoading: isCateLoading } = useCategories();
-  const { data: content, isLoading: isContentLoading } = useContent(params.id);
-  const updateContent = useContentUpdate(params.id);
-  const updateInfContent = useInfContentsUpdate();
+  const { data: categories } = useCategories();
+  const { data: content } = useContent(params.id);
+  const { mutate: mutateContent } = useContentUpdate();
 
-  useEffect(() => {
-    if (editor.current) {
-      setEditorReady(true);
-    }
-  }, [isContentLoading]);
-
-  if (isCateLoading || isContentLoading || !categories || !content)
-    return <>Loading...</>;
+  if (!categories || !content) return <>Loading...</>;
 
   return (
     <Flex>
       <Editor
         ready={isEditorReady}
         rref={editor}
-        editorState={
-          content
-            ? JSON.stringify(JSON.parse(content.content).editorState)
-            : null
-        }
+        editorState={JSON.stringify(JSON.parse(content.content).editorState)}
       />
       <View
         minWidth={400}
@@ -195,14 +181,32 @@ export default function ContentDetailPage({
                   if (editor.current) {
                     setIsButtonLoading(true);
                     try {
-                      const d = await updateContent({
-                        ...activeContentDrafting,
-                        content: JSON.stringify(editor.current.toJSON()),
+                      // const d = await updateContent(
+                      //   `/api/content/${content.id}`,
+                      //   {
+                      //     arg: {
+                      //       ...activeContentDrafting,
+                      //       content: JSON.stringify(editor.current.toJSON()),
+                      //     },
+                      //   },
+                      // );
+                      // mutateInfContent();
+                      // mutateContent(d, {
+                      //   populateCache: (n, t) => n,
+                      //   revalidate: false,
+                      // });
+                      await mutateContent({
+                        id: params.id,
+                        content: {
+                          ...activeContentDrafting,
+                          content: JSON.stringify(editor.current.toJSON()),
+                        },
                       });
-                      updateInfContent([d]);
+                      // m()
                       clearDraftedContent();
                       setDaftedTagDirty(false);
                     } catch (error) {
+                      console.log(error);
                       alert("Something went wrong!");
                     } finally {
                       setIsButtonLoading(false);

@@ -1,7 +1,8 @@
 "use client";
 
+import { IContent } from "@/types/content";
 import { useCategories } from "../hooks/use-category";
-import { useInfContents } from "../hooks/use-content";
+import { useInfContent, usePrefetchContent } from "../hooks/use-content";
 import { usePageMeta } from "../hooks/use-page-meta";
 import { useTrackingScroll } from "../hooks/use-scroll-position";
 import { IColumnContent, TableContent } from "./components/table";
@@ -9,7 +10,6 @@ import { PreviewButton, PreviewPannel } from "./components/table-row-preview";
 import { TableContentToolbar } from "./components/table-toolbar";
 import "./page.css";
 import { useMainStore } from "@/stores/providers/main-store";
-import { IContent } from "@/stores/slices/content";
 import {
   ActionButton,
   Flex,
@@ -23,10 +23,12 @@ import {
   TooltipTrigger,
 } from "@adobe/react-spectrum";
 import MoreVertical from "@spectrum-icons/workflow/MoreVertical";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 export default function ContentListPage() {
   const tableRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
   const {
     selectedRowIds,
     setSelectedRowIds,
@@ -38,8 +40,9 @@ export default function ContentListPage() {
   usePageMeta({ title: "Published content" });
   useTrackingScroll(tableRef);
 
-  const contents = useInfContents();
-  const { data: categories, isLoading: isCateLoading } = useCategories();
+  const contents = useInfContent();
+  const prefechContentById = usePrefetchContent();
+  const { data: categories, isFetching: isCateFetching } = useCategories();
 
   useEffect(() => {
     return () => {
@@ -47,8 +50,7 @@ export default function ContentListPage() {
     };
   }, [clearRowPreview]);
 
-  if (contents.isLoading || isCateLoading || !categories || !contents.data)
-    return <>Loading...</>;
+  if (!categories || !contents.data) return <>Loading...</>;
 
   const columns: IColumnContent[] = [
     {
@@ -67,13 +69,26 @@ export default function ContentListPage() {
         _,
         item: IContent, // Add prefetch
       ) => (
-        <TooltipTrigger delay={1000} crossOffset={50} placement="bottom start">
+        <TooltipTrigger
+          delay={1000}
+          crossOffset={50}
+          placement="bottom start"
+          onOpenChange={(e) => {}}
+        >
           <Link
             href={`/content/${item.id}`}
             isQuiet
             UNSAFE_style={{ color: "black" }}
           >
-            {item.title}
+            <span
+              onMouseEnter={(e) => {
+                router.prefetch(`/content/${item.id}`);
+                prefechContentById(item.id);
+                // preload(`/api/content/${item.id}`, fetcher);
+              }}
+            >
+              {item.title}
+            </span>
           </Link>
           <Tooltip>{item.title}</Tooltip>
         </TooltipTrigger>
@@ -105,7 +120,7 @@ export default function ContentListPage() {
       name: "Category",
       minWidth: 150,
       render: (_, item: IContent) => {
-        if (isCateLoading) return <>Loading</>;
+        if (isCateFetching) return <>Loading</>;
         return (
           <>{categories.filter((c) => c.id === item.categoryId)[0].name}</>
         );
@@ -154,12 +169,12 @@ export default function ContentListPage() {
         </Flex>
         <div ref={tableRef}>
           <TableContent
-            items={contents.data.flatMap((c) => c)}
+            items={contents.data.pages.flatMap((c) => c)}
             columns={columns}
             height="calc(100vh - 140px)"
-            isRowLoading={contents.isLoading ? "loadingMore" : "idle"}
+            // isRowLoading={tableLoader.loadingState}
             onClearSelection={clearSelectedRowIds}
-            onRowLoadMore={contents.loadMore}
+            onRowLoadMore={contents.fetchNextPage}
             onSelectionChange={setSelectedRowIds}
             selectedRowIds={selectedRowIds}
           />
@@ -169,7 +184,7 @@ export default function ContentListPage() {
         <PreviewPannel
           content={
             rowIdForPreview
-              ? contents.data
+              ? contents.data.pages
                   .flatMap((c) => c)
                   .filter((c) => c.id === rowIdForPreview)[0]
               : null
