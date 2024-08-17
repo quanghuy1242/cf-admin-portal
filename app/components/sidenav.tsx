@@ -29,6 +29,7 @@ interface Route {
   href?: string;
   disablePrefetch?: boolean;
   children?: Route[];
+  enabled?: boolean;
 }
 
 const SideNavActual = () => {
@@ -40,6 +41,7 @@ const SideNavActual = () => {
       label: "Home",
       icon: <IconHome slot="icon" />,
       href: "/",
+      enabled: true,
     },
     {
       label: "Feed",
@@ -54,6 +56,7 @@ const SideNavActual = () => {
           label: "Published",
           icon: <IconPublishCheck slot="icon" />,
           href: "/content",
+          enabled: true,
         },
         {
           label: "Drafts",
@@ -71,6 +74,7 @@ const SideNavActual = () => {
           href: activeContentId
             ? `/content/${activeContentId}`
             : "/content/new",
+          enabled: true,
         },
       ],
     },
@@ -141,11 +145,11 @@ const SideNavActual = () => {
   useEffect(() => {
     // Allow 2 levels for prefetching
     routers.forEach((r) => {
-      if (!r?.disablePrefetch && r?.href) {
+      if (!r?.disablePrefetch && r?.href && r.enabled) {
         router.prefetch(r.href);
       } else if (r?.children) {
         r.children.forEach((cr) => {
-          if (!cr?.disablePrefetch && cr.href) {
+          if (!cr?.disablePrefetch && cr.href && cr.enabled) {
             router.prefetch(cr.href);
           }
         });
@@ -183,6 +187,7 @@ const SideNavActual = () => {
                 label={cr.label}
                 value={cr.href}
                 selected={cr.href === selectedSideNavItem}
+                disabled={!cr.enabled}
                 onClick={(e) => {
                   e.preventDefault();
                   router.push(cr.href || "/", {
@@ -201,6 +206,7 @@ const SideNavActual = () => {
             key={r.href}
             label={r.label}
             value={r.href}
+            disabled={!r.enabled}
             selected={r.href === selectedSideNavItem}
             onClick={(e) => {
               e.preventDefault();
