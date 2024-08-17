@@ -85,24 +85,20 @@ export const PreviewPannel = ({ content }: { content: IContent | null }) => {
             <Flex direction="column" gap={10} marginY={10}>
               <LabeledValue label="Title" value={content?.title} />
               <Image src={content?.coverImage} alt="ALT" />
-              {content?.tags.length === 0 || content?.tags[0] === "" ? (
-                <></>
-              ) : (
-                <TagGroup
-                  items={content.tags.map((t, i) => ({
-                    i,
-                    t,
-                  }))}
-                  label="Tags"
-                  maxRows={3}
-                >
-                  {(item) => <Item key={item.i}>{item.t}</Item>}
-                </TagGroup>
-              )}
-              <LabeledValue
-                label="Modified"
-                value={new Date(content.modified).toLocaleString()}
-              />
+              <TagGroup
+                items={
+                  content.tags
+                    .filter((t) => t !== "")
+                    .map((t, i) => ({
+                      id: t,
+                      name: t,
+                    })) || []
+                }
+                label="Tags"
+                maxRows={3}
+              >
+                {(item) => <Item key={item.id}>{item.name}</Item>}
+              </TagGroup>
               <LabeledValue
                 label="Created"
                 value={new Date(content.created).toLocaleString()}
