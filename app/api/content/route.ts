@@ -47,4 +47,43 @@ export const GET = async (request: NextRequest) => {
   return Response.json(await contents.json());
 };
 
+export const POST = async (request: NextRequest) => {
+  // Grab the access token
+  const response = new NextResponse();
+  const session = await getSession(request, response);
+  if (!session) {
+    return Response.json({ message: "Bad" }, { status: 401 });
+  }
+  const { user, accessToken } = session;
+  const body: object = await request.json();
+  const content = await getRequestContext().env.CONTENT.fetch(
+    process.env.CONTENT_API + "/api/v1/contents",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...body,
+        meta: { twitterCard: "abc" },
+        userId: user.sub,
+        status: "ACTIVE"
+      }),
+    },
+  );
+  if (content.status !== 201) {
+    return Response.json(
+      {
+        message: "There something wrong",
+        error: await content.json(),
+      },
+      {
+        status: 400,
+      },
+    );
+  }
+  return Response.json(await content.json());
+};
+
 export const runtime = "edge";

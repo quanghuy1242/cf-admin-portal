@@ -6,5 +6,5 @@ export const usePageMeta = (meta: Partial<PageMeta>) => {
   const setPageMeta = useMainStore((state) => state.setPageMeta);
   useEffect(() => {
     setPageMeta(meta);
-  }, []);
+  }, [meta, setPageMeta]);
 };

@@ -86,13 +86,15 @@ export default function ContentDetailPage({
                       <InlineAlert variant="negative" margin={10}>
                         <Heading>Validation Errors</Heading>
                         <Content>
-                          {errors.map((e: any) => (
-                            <LabeledValue
-                              key={(e.path as string[]).join(":")}
-                              label={`Field name: ${(e.path as string[]).join(" > ")}`}
-                              value={`${e.message}: ${e.code}`}
-                            />
-                          ))}
+                          <Flex direction="column" gap={10}>
+                            {errors.map((e: any) => (
+                              <LabeledValue
+                                key={(e.path as string[]).join(":")}
+                                label={`Field name: ${(e.path as string[]).join(" > ")}`}
+                                value={`${e.message}: ${e.code}`}
+                              />
+                            ))}
+                          </Flex>
                         </Content>
                       </InlineAlert>
                     )}

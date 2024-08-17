@@ -1,9 +1,10 @@
 import {
+  createContent,
   fetchContent,
   fetchContents,
   updateContent,
 } from "@/services/contents";
-import { IContentUpdate } from "@/types/content";
+import { IContentCreate, IContentUpdate } from "@/types/content";
 import {
   useInfiniteQuery,
   useMutation,
@@ -86,6 +87,25 @@ export const useContentUpdate = () => {
         }),
         queryClient.invalidateQueries({
           queryKey: [ContentQueryKey.content, id],
+        }),
+      ]);
+    },
+  });
+  return {
+    mutate: mutateAsync,
+  };
+};
+
+export const useContentCreate = () => {
+  const queryClient = useQueryClient();
+  const { mutateAsync } = useMutation({
+    mutationFn: ({ content }: { content: IContentCreate }) => {
+      return createContent(content);
+    },
+    onSettled: async (data, err, { content }) => {
+      return Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: [ContentQueryKey.infContents],
         }),
       ]);
     },

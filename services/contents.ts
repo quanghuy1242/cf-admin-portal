@@ -32,4 +32,13 @@ export const updateContent = async (id: string, data: IContentUpdate) => {
   return (await response.json()) as IContent;
 };
 
-export const createContent = async (data: IContentCreate) => {};
+export const createContent = async (data: IContentCreate) => {
+  const response = await fetch(`/api/content`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  if (response.status !== 200) {
+    throw await response.json();
+  }
+  return (await response.json()) as IContent;
+};

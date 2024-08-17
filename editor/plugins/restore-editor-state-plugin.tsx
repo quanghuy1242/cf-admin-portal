@@ -19,6 +19,9 @@ export const RestoreInputPlugin = ({
         editor.setEditable(true);
         editor.focus();
       }
+    } else if (isFirstRender && editorState === null) {
+      editor.setEditable(true);
+      editor.focus();
     }
   }, [isFirstRender, editor, editorState]);
 
