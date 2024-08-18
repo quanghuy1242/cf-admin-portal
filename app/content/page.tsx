@@ -1,6 +1,5 @@
 "use client";
 
-import { IContent } from "@/types/content";
 import { useCategories } from "../hooks/use-category";
 import { useInfContent, usePrefetchContent } from "../hooks/use-content";
 import { usePageMeta } from "../hooks/use-page-meta";
@@ -10,6 +9,7 @@ import { PreviewButton, PreviewPannel } from "./components/table-row-preview";
 import { TableContentToolbar } from "./components/table-toolbar";
 import "./page.css";
 import { useMainStore } from "@/stores/providers/main-store";
+import { IContent } from "@/types/content";
 import {
   ActionButton,
   Flex,
@@ -120,7 +120,7 @@ export default function ContentListPage() {
       name: "Category",
       minWidth: 150,
       render: (_, item: IContent) => {
-        if (isCateFetching) return <>Loading</>;
+        if (!categories) return <>Loading</>;
         return (
           <>{categories.filter((c) => c.id === item.categoryId)[0].name}</>
         );
